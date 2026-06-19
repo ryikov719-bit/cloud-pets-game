@@ -1,0 +1,2473 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>云栖灵宠图鉴：帕洛斯序章</title>
+  <style>
+    :root {
+      --ink: #252a32;
+      --muted: #687281;
+      --paper: #fffaf4;
+      --panel: rgba(255, 255, 255, .82);
+      --line: rgba(37, 42, 50, .14);
+      --skin: #f4c8b8;
+      --hair: #b3886f;
+      --hoodie: #f7f6f4;
+      --bear: #e6c08a;
+      --gold: #ffc85a;
+      --sky: #7ebce8;
+      --mint: #71bea8;
+      --rose: #ef8d86;
+      --moon: #8d83c9;
+      --shadow: rgba(34, 48, 68, .18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(126, 188, 232, .34), transparent 30%),
+        radial-gradient(circle at 86% 16%, rgba(239, 141, 134, .22), transparent 28%),
+        linear-gradient(145deg, #fff9f1 0%, #eaf7fb 48%, #fff1e8 100%);
+      font-family: ui-rounded, "SF Pro Rounded", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      padding: clamp(8px, 1.8vw, 22px);
+    }
+
+    .app {
+      width: min(1240px, 100%);
+      height: min(780px, 100%);
+      min-height: 590px;
+      display: grid;
+      grid-template-rows: 56px 1fr 64px;
+      gap: 10px;
+    }
+
+    .top,
+    .bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+      font-size: clamp(20px, 2.2vw, 30px);
+      font-weight: 950;
+      white-space: nowrap;
+      letter-spacing: 0;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 50% 46%, #fff 0 17%, transparent 18%),
+        conic-gradient(from 210deg, var(--rose), var(--gold), var(--sky), var(--mint), var(--rose));
+      box-shadow: inset 0 0 0 7px rgba(255,255,255,.34), 0 10px 26px var(--shadow);
+      flex: 0 0 auto;
+    }
+
+    .stats,
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .pill {
+      height: 40px;
+      min-width: 84px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.74);
+      box-shadow: 0 8px 22px rgba(45, 59, 74, .08);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.78);
+      color: var(--ink);
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(45, 59, 74, .08);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(37, 42, 50, .24);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .nav button {
+      height: 42px;
+      padding: 0 15px;
+    }
+
+    button[data-active="true"] {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, #ef8d86, #8d83c9);
+    }
+
+    .game {
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+      border: 1px solid rgba(37, 42, 50, .13);
+      border-radius: 14px;
+      background: #fffaf4;
+      box-shadow: 0 28px 80px rgba(40, 55, 72, .2);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+    }
+
+    .message {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      width: min(520px, calc(100% - 36px));
+      min-height: 96px;
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border: 4px solid #2f3742;
+      border-radius: 0;
+      background: #fffaf4;
+      box-shadow: inset 0 0 0 4px #d9e5ef, 0 12px 0 rgba(37,42,50,.12);
+      font-weight: 850;
+      line-height: 1.45;
+      pointer-events: none;
+    }
+
+    .message[hidden],
+    .battle-menu[hidden] {
+      display: none;
+    }
+
+    .battle-menu {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      width: min(520px, calc(100% - 36px));
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0;
+      padding: 10px;
+      border: 4px solid #2f3742;
+      background: #fffaf4;
+      box-shadow: inset 0 0 0 4px #d9e5ef, 0 12px 0 rgba(37,42,50,.12);
+    }
+
+    .battle-menu button {
+      min-height: 48px;
+      padding: 8px 14px 8px 28px;
+      text-align: left;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      line-height: 1.15;
+      position: relative;
+    }
+
+    .battle-menu button::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 20px;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 9px solid #2f3742;
+      opacity: 0;
+    }
+
+    .battle-menu button:hover::before {
+      opacity: 1;
+    }
+
+    .battle-menu small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .mobile-controls {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: none;
+    }
+
+    .mobile-controls[hidden] {
+      display: none !important;
+    }
+
+    .dpad {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      width: 132px;
+      height: 132px;
+      display: grid;
+      grid-template: repeat(3, 44px) / repeat(3, 44px);
+    }
+
+    .touch-button {
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      border: 2px solid rgba(255,255,255,.85);
+      border-radius: 50%;
+      background: rgba(37,42,50,.72);
+      color: #fff;
+      box-shadow: 0 5px 14px rgba(25,34,43,.28);
+      pointer-events: auto;
+      touch-action: none;
+      user-select: none;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .touch-button[data-key="ArrowUp"] { grid-area: 1 / 2; }
+    .touch-button[data-key="ArrowLeft"] { grid-area: 2 / 1; }
+    .touch-button[data-key="ArrowDown"] { grid-area: 3 / 2; }
+    .touch-button[data-key="ArrowRight"] { grid-area: 2 / 3; }
+
+    .touch-action {
+      position: absolute;
+      right: 24px;
+      bottom: 38px;
+      width: 64px;
+      height: 64px;
+      background: rgba(239,141,134,.9);
+      font-size: 24px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-weight: 850;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 6px;
+      }
+
+      .app {
+        height: 100%;
+        min-height: 0;
+        grid-template-rows: 50px 1fr 56px;
+        gap: 6px;
+      }
+
+      .brand span:last-child {
+        max-width: 43vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .pill {
+        min-width: 58px;
+        padding: 0 8px;
+      }
+
+      .nav button {
+        height: 38px;
+        padding: 0 10px;
+      }
+
+      .battle-menu {
+        grid-template-columns: 1fr;
+        bottom: 10px;
+        right: 10px;
+        width: calc(100% - 20px);
+      }
+
+      .message {
+        left: 10px;
+        bottom: 252px;
+        width: calc(100% - 20px);
+        min-height: 60px;
+      }
+    }
+
+    @media (pointer: coarse), (max-width: 900px) {
+      .mobile-controls:not([hidden]) {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="云栖灵宠图鉴：帕洛斯序章">
+    <header class="top">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>云栖灵宠图鉴</span>
+      </div>
+      <div class="stats" aria-live="polite">
+        <div class="pill">捕捉球 <span id="stickers">10</span></div>
+        <div class="pill">图鉴 <span id="dexCount">1/6</span></div>
+        <div class="pill">灵晶 <span id="candy">3</span></div>
+      </div>
+    </header>
+
+    <section class="game" id="gameShell">
+      <canvas id="game" width="1120" height="640"></canvas>
+      <div class="message" id="message">在中心都市·晴风城调查地点、收集物资，并寻找灵宠伙伴。</div>
+      <div class="battle-menu" id="battleMenu" hidden>
+        <button data-action="attack">属性招式 <small>造成伤害，打出克制策略</small></button>
+        <button data-action="soothe">伙伴安抚 <small>提高亲密，更容易捕捉</small></button>
+        <button data-action="bear">伙伴守护 <small>恢复体力并降低警觉</small></button>
+        <button data-action="capture">基础捕捉球 <small>尝试收录到灵宠图鉴</small></button>
+      </div>
+      <div class="mobile-controls" id="mobileControls" aria-label="触控操作">
+        <div class="dpad" aria-label="移动方向">
+          <button class="touch-button" data-key="ArrowUp" aria-label="向上">↑</button>
+          <button class="touch-button" data-key="ArrowLeft" aria-label="向左">←</button>
+          <button class="touch-button" data-key="ArrowDown" aria-label="向下">↓</button>
+          <button class="touch-button" data-key="ArrowRight" aria-label="向右">→</button>
+        </div>
+        <button class="touch-button touch-action" id="touchAction" aria-label="互动">●</button>
+      </div>
+    </section>
+
+    <footer class="bottom">
+      <div class="nav">
+        <button id="mapTab" data-active="true">地图</button>
+        <button id="dexTab">图鉴</button>
+        <button id="partyTab">队伍</button>
+        <button id="homeTab">研究所</button>
+      </div>
+      <div class="hint" id="hint">方向键/WASD 移动；进入高草丛后移动会随机遇敌</div>
+    </footer>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const shell = document.getElementById("gameShell");
+    const message = document.getElementById("message");
+    const battleMenu = document.getElementById("battleMenu");
+    const mobileControls = document.getElementById("mobileControls");
+    const touchAction = document.getElementById("touchAction");
+    const stickersEl = document.getElementById("stickers");
+    const dexCountEl = document.getElementById("dexCount");
+    const candyEl = document.getElementById("candy");
+    const hintEl = document.getElementById("hint");
+    const tabs = {
+      map: document.getElementById("mapTab"),
+      dex: document.getElementById("dexTab"),
+      party: document.getElementById("partyTab"),
+      home: document.getElementById("homeTab")
+    };
+
+    const W = 1120;
+    const H = 640;
+    const protagonist = new Image();
+    protagonist.src = "character-reference.png";
+    const protagonistCrop = { sx: 674, sy: 580, sw: 204, sh: 402 };
+    let protagonistCutout = null;
+    const petLineup = new Image();
+    petLineup.src = "pet-lineup-reference.png";
+    let petLineupCutout = null;
+    const petLineupExtra = new Image();
+    petLineupExtra.src = "pet-lineup-extra.png";
+    let petLineupExtraCutout = null;
+    const researchBuilding = new Image();
+    researchBuilding.src = "research-institute.png";
+    const shopBuilding = new Image();
+    shopBuilding.src = "creature-shop.png";
+    const mapTree = new Image();
+    mapTree.src = "map-tree.png";
+    const mapRocks = new Image();
+    mapRocks.src = "map-rocks.png";
+    const mapTallGrass = new Image();
+    mapTallGrass.src = "map-tall-grass.png";
+    const mapFlowers = new Image();
+    mapFlowers.src = "map-flowers.png";
+    const characterFrames = {
+      down: { sx: 674, sy: 580, sw: 204, sh: 402 },
+      up: { sx: 1086, sy: 580, sw: 202, sh: 402 },
+      right: { sx: 1310, sy: 574, sw: 206, sh: 410 },
+      walk: [
+        { sx: 68, sy: 70, sw: 230, sh: 410 },
+        { sx: 334, sy: 70, sw: 226, sh: 410 },
+        { sx: 580, sy: 70, sw: 226, sh: 410 },
+        { sx: 820, sy: 70, sw: 226, sh: 410 },
+        { sx: 1062, sy: 70, sw: 226, sh: 410 },
+        { sx: 1292, sy: 70, sw: 226, sh: 410 }
+      ]
+    };
+    const petFrames = {
+      bear: { sx: 70, sy: 218, sw: 262, sh: 300, anchorY: .9 },
+      sparkfox: { sx: 348, sy: 250, sw: 260, sh: 268, anchorY: .88 },
+      bubbleturtle: { sx: 650, sy: 215, sw: 238, sh: 306, anchorY: .9 },
+      leafbunny: { sx: 938, sy: 192, sw: 250, sh: 326, anchorY: .9 },
+      mooncat: { sx: 1212, sy: 218, sw: 292, sh: 300, anchorY: .88 }
+    };
+    const extraPetFrames = {
+      rockpanda: { sx: 48, sy: 82, sw: 246, sh: 276, anchorY: .9 },
+      waterfox: { sx: 336, sy: 65, sw: 274, sh: 294, anchorY: .9 },
+      forestdeer: { sx: 650, sy: 58, sw: 260, sh: 302, anchorY: .9 },
+      firelion: { sx: 948, sy: 58, sw: 254, sh: 302, anchorY: .9 },
+      thundermouse: { sx: 1224, sy: 72, sw: 282, sh: 288, anchorY: .9 },
+      ghostcat: { sx: 48, sy: 548, sw: 256, sh: 272, anchorY: .9 },
+      sandturtle: { sx: 326, sy: 568, sw: 282, sh: 250, anchorY: .9 },
+      flowerfairy: { sx: 636, sy: 550, sw: 276, sh: 268, anchorY: .88 },
+      icepenguin: { sx: 946, sy: 548, sw: 256, sh: 274, anchorY: .9 },
+      cloudsheep: { sx: 1222, sy: 548, sw: 286, sh: 272, anchorY: .9 }
+    };
+
+    const typeData = {
+      plush: { name: "软绒", a: "#e6c08a", b: "#9d7045", light: "#fff1d2" },
+      spark: { name: "星电", a: "#ffd35c", b: "#b88323", light: "#fff5bd" },
+      water: { name: "水泡", a: "#7ebce8", b: "#397eb5", light: "#e2f7ff" },
+      leaf: { name: "绒叶", a: "#71bea8", b: "#438b72", light: "#e5fff4" },
+      fire: { name: "暖焰", a: "#f08b72", b: "#b95843", light: "#ffe0d2" },
+      moon: { name: "风", a: "#9dc4e5", b: "#5d83ae", light: "#edf7ff" },
+      ice: { name: "冰", a: "#a9dff3", b: "#4b9dbd", light: "#eefbff" },
+      rock: { name: "岩", a: "#b9a47f", b: "#746144", light: "#f6efe2" },
+      ghost: { name: "幽灵", a: "#8d83c9", b: "#57508d", light: "#eeeaff" },
+      fairy: { name: "妖精", a: "#ee9fca", b: "#a85d88", light: "#fff0f8" },
+      ground: { name: "地面", a: "#c6a46d", b: "#7d633a", light: "#f8efdf" },
+      normal: { name: "普通", a: "#b9b4aa", b: "#706d66", light: "#f6f4ef" }
+    };
+
+    const mons = [
+      { id: "bear", name: "小火龙", type: "fire", level: 5, hp: 48, maxHp: 48, power: 9, rarity: "初始伙伴", desc: "活泼热情的小龙，喜欢奔跑和晒太阳，尾尖火焰会随心情跳动。" },
+      { id: "sparkfox", name: "泡泡鱼", type: "water", level: 4, hp: 38, maxHp: 38, power: 7, rarity: "常见", desc: "温柔爱干净的水系伙伴，游动时会吹出一串晶莹泡泡。" },
+      { id: "bubbleturtle", name: "叶叶猫", type: "leaf", level: 5, hp: 42, maxHp: 42, power: 7, rarity: "少见", desc: "安静又文艺，喜欢花草，叶片尾巴能感知附近的自然能量。" },
+      { id: "leafbunny", name: "闪电兔", type: "spark", level: 6, hp: 36, maxHp: 36, power: 11, rarity: "少见", desc: "机灵好动、反应极快，奔跑时闪电尾巴会划出明亮轨迹。" },
+      { id: "mooncat", name: "云朵狗", type: "moon", level: 7, hp: 44, maxHp: 44, power: 9, rarity: "稀有", desc: "善良忠诚、向往自由，蓬松云毛能托着它轻轻飞过天空。" },
+      { id: "rockpanda", name: "岩竹熊", type: "rock", level: 6, hp: 54, maxHp: 54, power: 8, rarity: "少见", desc: "温和又可靠，喜欢抱着竹子到处走，坚实身体能推开岩石障碍。" },
+      { id: "waterfox", name: "水漾狐", type: "water", level: 6, hp: 40, maxHp: 40, power: 10, rarity: "少见", desc: "优雅敏捷的水系灵宠，流动般的尾巴能够发现隐藏水路。" },
+      { id: "forestdeer", name: "森灵鹿", type: "leaf", level: 7, hp: 46, maxHp: 46, power: 9, rarity: "稀有", desc: "与森林植物温柔共鸣，枝角上的嫩叶能唤醒枯萎植物。" },
+      { id: "firelion", name: "焰狮仔", type: "fire", level: 7, hp: 45, maxHp: 45, power: 12, rarity: "稀有", desc: "自信勇敢，奔跑时鬃毛化作跃动火焰，可以点燃古老火把。" },
+      { id: "thundermouse", name: "雷电鼠", type: "spark", level: 5, hp: 34, maxHp: 34, power: 10, rarity: "常见", desc: "警觉又爱收集亮晶晶物件，脸颊储存的电流能照亮黑暗。" },
+      { id: "ghostcat", name: "幽灵喵", type: "ghost", level: 8, hp: 38, maxHp: 38, power: 12, rarity: "稀有", desc: "神秘调皮的夜行灵宠，脚步无声，能够穿过部分影子机关。" },
+      { id: "sandturtle", name: "沙甲龟", type: "ground", level: 6, hp: 58, maxHp: 58, power: 7, rarity: "少见", desc: "沉稳耐心，沙岩层般的背甲能保护训练师穿越强烈沙暴。" },
+      { id: "flowerfairy", name: "花蝶仙", type: "fairy", level: 6, hp: 36, maxHp: 36, power: 9, rarity: "少见", desc: "轻盈爱跳舞，彩色翅膀散发花香，能够驱散花粉迷雾。" },
+      { id: "icepenguin", name: "冰晶企鹅", type: "ice", level: 7, hp: 47, maxHp: 47, power: 10, rarity: "稀有", desc: "认真又害羞，头顶冰晶从不融化，可以冻结浅水形成道路。" },
+      { id: "cloudsheep", name: "彩云羊", type: "fairy", level: 8, hp: 50, maxHp: 50, power: 9, rarity: "珍稀", desc: "温顺梦幻，云毛随天气变色，能在空中制造短暂的彩色云桥。" }
+    ];
+
+    const TILE = 32;
+    const MAP_COLS = 35;
+    const MAP_ROWS = 30;
+    const WORLD_H = MAP_ROWS * TILE;
+
+    const regionZones = {
+      city: [
+        { id: "city-west-grass", name: "北门西侧草地", x1: 128, y1: 64, x2: 448, y2: 288, pool: ["leafbunny", "thundermouse", "rockpanda"] },
+        { id: "city-east-grass", name: "北门东侧草地", x1: 672, y1: 64, x2: 992, y2: 288, pool: ["bubbleturtle", "forestdeer", "flowerfairy"] }
+      ],
+      forest: [
+        { id: "forest-northwest", name: "青翠湖畔草丛", x1: 64, y1: 96, x2: 416, y2: 320, pool: ["sparkfox", "waterfox", "flowerfairy"] },
+        { id: "forest-northeast", name: "萌芽草地", x1: 672, y1: 96, x2: 1056, y2: 320, pool: ["bubbleturtle", "forestdeer", "rockpanda"] },
+        { id: "forest-midwest", name: "藤蔓洞穴外围", x1: 64, y1: 352, x2: 416, y2: 608, pool: ["rockpanda", "ghostcat", "sandturtle"] },
+        { id: "forest-mideast", name: "瀑布深潭草地", x1: 672, y1: 352, x2: 1056, y2: 608, pool: ["waterfox", "sparkfox", "icepenguin"] },
+        { id: "forest-southwest", name: "隐秘林地", x1: 64, y1: 640, x2: 416, y2: 896, pool: ["thundermouse", "leafbunny", "ghostcat"] },
+        { id: "forest-southeast", name: "大树洞窟外围", x1: 672, y1: 640, x2: 1056, y2: 896, pool: ["firelion", "cloudsheep", "forestdeer"] }
+      ]
+    };
+
+    const mapRegions = {
+      city: { name: "中心都市·晴风城", bounds: { minX: TILE, maxX: W - TILE, minY: TILE, maxY: WORLD_H - TILE } },
+      forest: { name: "晨曦森林", bounds: { minX: TILE, maxX: W - TILE, minY: TILE, maxY: WORLD_H - TILE } }
+    };
+
+    function makeGrid(fill = "grass") {
+      return Array.from({ length: MAP_ROWS }, () => Array(MAP_COLS).fill(fill));
+    }
+
+    function fillTiles(grid, x1, y1, x2, y2, tile) {
+      for (let y = y1; y <= y2; y++) for (let x = x1; x <= x2; x++) {
+        if (grid[y] && grid[y][x] !== undefined) grid[y][x] = tile;
+      }
+    }
+
+    function buildCityGrid() {
+      const g = makeGrid();
+      fillTiles(g, 0, 0, 34, 0, "tree");
+      fillTiles(g, 0, 29, 34, 29, "tree");
+      fillTiles(g, 0, 0, 0, 29, "tree");
+      fillTiles(g, 34, 0, 34, 29, "tree");
+      fillTiles(g, 16, 0, 18, 29, "path");
+      fillTiles(g, 8, 13, 26, 18, "path");
+      fillTiles(g, 4, 3, 13, 8, "tall");
+      fillTiles(g, 21, 3, 30, 8, "tall");
+      fillTiles(g, 3, 10, 9, 13, "building");
+      fillTiles(g, 25, 10, 31, 13, "building");
+      fillTiles(g, 5, 20, 13, 23, "water");
+      fillTiles(g, 21, 20, 29, 23, "water");
+      fillTiles(g, 16, 20, 18, 23, "path");
+      fillTiles(g, 4, 26, 30, 28, "path");
+      fillTiles(g, 16, 0, 18, 1, "path");
+      return g;
+    }
+
+    function buildForestGrid() {
+      const g = makeGrid("grass");
+      fillTiles(g, 0, 0, 34, 0, "tree");
+      fillTiles(g, 0, 29, 34, 29, "tree");
+      fillTiles(g, 0, 0, 0, 29, "tree");
+      fillTiles(g, 34, 0, 34, 29, "tree");
+      fillTiles(g, 16, 0, 18, 29, "path");
+      fillTiles(g, 13, 8, 18, 10, "path");
+      fillTiles(g, 13, 10, 15, 19, "path");
+      fillTiles(g, 13, 17, 21, 20, "path");
+      fillTiles(g, 19, 20, 21, 29, "path");
+      fillTiles(g, 2, 3, 12, 9, "tall");
+      fillTiles(g, 22, 3, 32, 9, "tall");
+      fillTiles(g, 2, 11, 12, 18, "tall");
+      fillTiles(g, 22, 11, 32, 18, "tall");
+      fillTiles(g, 2, 20, 12, 27, "tall");
+      fillTiles(g, 22, 20, 32, 27, "tall");
+      fillTiles(g, 4, 5, 9, 9, "water");
+      fillTiles(g, 25, 13, 30, 17, "water");
+      fillTiles(g, 2, 15, 5, 17, "rock");
+      fillTiles(g, 7, 13, 9, 16, "tree");
+      fillTiles(g, 26, 22, 29, 25, "tree");
+      fillTiles(g, 16, 0, 18, 1, "path");
+      fillTiles(g, 19, 28, 21, 29, "path");
+      return g;
+    }
+
+    const worldMaps = { city: buildCityGrid(), forest: buildForestGrid() };
+
+    const state = {
+      mode: "map",
+      mapRegion: "city",
+      regionCooldown: 0,
+      time: 0,
+      keys: new Set(),
+      player: { x: 560, y: 608, tx: 560, ty: 608, step: 0, dir: "down", moving: false },
+      stickers: 10,
+      candy: 3,
+      captured: new Set(["bear"]),
+      party: ["bear"],
+      selectedDex: 0,
+      messageTimer: 0,
+      encounterClock: 0,
+      battle: null,
+      particles: [],
+      transition: 0
+    };
+
+    function fitCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(W * dpr);
+      canvas.height = Math.floor(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function mon(id) {
+      return mons.find(m => m.id === id);
+    }
+
+    function type(id) {
+      return typeData[id];
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function rand(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function setMessage(text, seconds = 2.6) {
+      message.textContent = text;
+      message.hidden = false;
+      state.messageTimer = seconds;
+    }
+
+    function interactMap() {
+      if (state.mode !== "map") return;
+      setMessage(isInTallGrass() ? "草叶正在沙沙作响，继续移动可能遇见野生灵宠。" : "附近没有可互动的目标。", 1.6);
+    }
+
+    function updateUI() {
+      stickersEl.textContent = String(state.stickers);
+      candyEl.textContent = String(state.candy);
+      dexCountEl.textContent = `${state.captured.size}/${mons.length}`;
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      battleMenu.hidden = mode !== "battle";
+      mobileControls.hidden = mode !== "map";
+      Object.keys(tabs).forEach(key => tabs[key].dataset.active = String(key === mode));
+      hintEl.textContent = {
+        map: "方向键/WASD 移动；只有在高草丛中移动才会随机遇敌",
+        dex: "图鉴记录已发现的灵宠、属性与生态资料",
+        party: "队伍用于出战，后续可扩展换队和升级",
+        home: "帕洛斯研究所可补充捕捉球、灵晶与调查任务",
+        battle: "选择行动：属性招式、安抚、守护或捕捉"
+      }[mode];
+      if (mode !== "battle") state.battle = null;
+      if (mode === "map") {
+        setMessage(state.mapRegion === "forest"
+          ? "晨曦森林生态丰富。调查湖泊、花海、古树和隐秘洞穴，记录新的灵宠。"
+          : "探索中心都市·晴风城，从北门出城口进入晨曦森林。");
+      }
+      if (mode === "dex") setMessage("云栖灵宠图鉴记录每一只伙伴的属性、栖息地与成长线索。");
+      if (mode === "party") setMessage("当前队伍由小火龙带队，捕捉成功的宠物会自动加入。");
+      if (mode === "home") {
+        state.stickers = Math.max(state.stickers, 10);
+        state.candy = Math.max(state.candy, 3);
+        updateUI();
+        setMessage("回到帕洛斯研究所，捕捉球与灵晶已经补充完毕。");
+      }
+    }
+
+    function currentZone() {
+      return regionZones[state.mapRegion].find(z =>
+        state.player.x >= z.x1 && state.player.x <= z.x2 && state.player.y >= z.y1 && state.player.y <= z.y2
+      );
+    }
+
+    function tileAt(x, y) {
+      const col = clamp(Math.floor(x / TILE), 0, MAP_COLS - 1);
+      const row = clamp(Math.floor(y / TILE), 0, MAP_ROWS - 1);
+      return worldMaps[state.mapRegion][row][col];
+    }
+
+    function isWalkable(x, y) {
+      const samples = [[-11, -8], [11, -8], [-11, 12], [11, 12]];
+      if (state.mapRegion === "city") {
+        if (Math.hypot(x - 560, y - 520) < 68) return false;
+        if (x > 48 && x < 392 && y > 240 && y < 480) return false;
+        if (x > 728 && x < 1072 && y > 250 && y < 480) return false;
+      }
+      return samples.every(([ox, oy]) => !["tree", "water", "building", "rock"].includes(tileAt(x + ox, y + oy)));
+    }
+
+    function isInTallGrass() {
+      return tileAt(state.player.x, state.player.y + 8) === "tall";
+    }
+
+    function recoverPlayerIfBlocked() {
+      if (isWalkable(state.player.x, state.player.y)) return;
+      const fallback = state.mapRegion === "city" ? { x: 560, y: 608 } : { x: 656, y: 900 };
+      Object.assign(state.player, { x: fallback.x, y: fallback.y, tx: fallback.x, ty: fallback.y, moving: false });
+    }
+
+    function switchMapRegion(region) {
+      state.mapRegion = region;
+      state.regionCooldown = 1.2;
+      state.encounterClock = 0;
+      const spawn = region === "forest" ? { x: 656, y: 900, dir: "up" } : { x: 560, y: 104, dir: "down" };
+      Object.assign(state.player, { x: spawn.x, y: spawn.y, tx: spawn.x, ty: spawn.y, dir: spawn.dir, moving: false });
+      state.transition = 1;
+      hintEl.textContent = region === "forest"
+        ? "探索晨曦森林；南侧返回晴风城，北侧通往后续区域"
+        : "探索晴风城；前往北门出城口进入晨曦森林";
+      setMessage(region === "forest"
+        ? "抵达晨曦森林。沿主路深入，探索九处生态地点。"
+        : "返回中心都市·晴风城。研究所已经记录本次森林调查。", 3.2);
+    }
+
+    function checkRegionTransition() {
+      if (state.regionCooldown > 0) return;
+      if (state.mapRegion === "city" && state.player.y < 48 && Math.abs(state.player.x - 560) < 52) {
+        switchMapRegion("forest");
+      } else if (state.mapRegion === "forest" && state.player.y > 912 && Math.abs(state.player.x - 656) < 52) {
+        switchMapRegion("city");
+      } else if (state.mapRegion === "forest" && state.player.y < 48 && Math.abs(state.player.x - 560) < 52) {
+        state.regionCooldown = 2;
+        setMessage("通往焰岩山的北侧道路将在下一片探索区域开放。", 2.6);
+      }
+    }
+
+    function startEncounter() {
+      if (state.mode !== "map") return;
+      const z = currentZone();
+      if (!z || !isInTallGrass()) return;
+      const pool = z ? z.pool : mons.filter(m => m.id !== "bear").map(m => m.id);
+      const enemy = structuredClone(mon(pool[Math.floor(Math.random() * pool.length)]));
+      enemy.level += Math.floor(rand(0, 3));
+      enemy.maxHp += enemy.level * 3;
+      enemy.hp = enemy.maxHp;
+      enemy.alert = 68;
+      enemy.bond = 12;
+      const ally = structuredClone(mon(state.party[0]));
+      ally.hp = ally.maxHp;
+      state.battle = {
+        ally,
+        enemy,
+        zone: z ? z.name : mapRegions[state.mapRegion].name,
+        phase: "player",
+        flash: 0,
+        shake: 0,
+        capturePulse: 0
+      };
+      state.transition = 1;
+      setMode("battle");
+      setMessage(`${state.battle.zone}里出现了 ${enemy.name}！`);
+    }
+
+    function battleAction(action) {
+      const b = state.battle;
+      if (!b || b.phase !== "player") return;
+      const e = b.enemy;
+      const a = b.ally;
+      if (action === "attack") {
+        const damage = Math.floor(rand(8, 13) + a.power);
+        e.hp = clamp(e.hp - damage, 1, e.maxHp);
+        e.alert = clamp(e.alert - 10, 0, 100);
+        b.flash = .8;
+        b.shake = .9;
+        burst(790, 260, type(a.type).a, 28);
+        setMessage(`${a.name} 发动属性招式，${e.name} 的体力与警觉降低了。`, 1.5);
+      }
+      if (action === "soothe") {
+        e.bond = clamp(e.bond + 24, 0, 100);
+        e.alert = clamp(e.alert - 15, 0, 100);
+        e.hp = clamp(e.hp - 6, 1, e.maxHp);
+        burst(790, 260, "#9edcff", 32);
+        setMessage(`训练师耐心安抚 ${e.name}，伙伴亲密值上升。`, 1.5);
+      }
+      if (action === "bear") {
+        a.hp = clamp(a.hp + 12, 0, a.maxHp);
+        e.alert = clamp(e.alert - 18, 0, 100);
+        e.bond = clamp(e.bond + 10, 0, 100);
+        burst(300, 380, "#ffc85a", 38);
+        setMessage(`${a.name} 展开伙伴守护，恢复体力并让对方放松下来。`, 1.5);
+      }
+      if (action === "capture") {
+        tryCapture();
+        return;
+      }
+      b.phase = "enemy";
+      setTimeout(enemyTurn, 780);
+    }
+
+    function tryCapture() {
+      const b = state.battle;
+      const e = b.enemy;
+      if (state.stickers <= 0) {
+        setMessage("基础捕捉球用完了，回帕洛斯研究所补充后再来。");
+        return;
+      }
+      state.stickers -= 1;
+      updateUI();
+      b.capturePulse = 1;
+      burst(790, 260, "#ffc85a", 52);
+      const hpFactor = 1 - e.hp / e.maxHp;
+      const chance = clamp(.22 + hpFactor * .36 + (100 - e.alert) * .0035 + e.bond * .0042, .18, .9);
+      if (Math.random() < chance) {
+        state.captured.add(e.id);
+        if (!state.party.includes(e.id) && state.party.length < 3) state.party.push(e.id);
+        updateUI();
+        setMessage(`${e.name} 成为了新的伙伴，生态资料已收入图鉴！`, 2.4);
+        setTimeout(() => setMode("map"), 1350);
+      } else {
+        e.alert = clamp(e.alert + 9, 0, 100);
+        setMessage(`${e.name} 挣脱了捕捉球，再安抚一下会更容易。`, 1.6);
+        b.phase = "enemy";
+        setTimeout(enemyTurn, 900);
+      }
+    }
+
+    function enemyTurn() {
+      const b = state.battle;
+      if (!b || b.phase !== "enemy") return;
+      const e = b.enemy;
+      const a = b.ally;
+      const damage = Math.floor(rand(5, 10) + e.power * .45);
+      a.hp = clamp(a.hp - damage, 0, a.maxHp);
+      b.shake = 1;
+      burst(318, 384, type(e.type).a, 20);
+      if (a.hp <= 0) {
+        setMessage(`${a.name} 体力不足，先回研究所治疗。`);
+        setTimeout(() => setMode("home"), 1150);
+      } else {
+        setMessage(`${e.name} 发动了试探攻击，${a.name} 坚持住了。`, 1.4);
+        b.phase = "player";
+      }
+    }
+
+    function burst(x, y, color, count) {
+      for (let i = 0; i < count; i++) {
+        state.particles.push({
+          x,
+          y,
+          vx: rand(-120, 120),
+          vy: rand(-150, 70),
+          life: rand(.45, .9),
+          max: rand(.45, .9),
+          r: rand(2, 5),
+          color
+        });
+      }
+    }
+
+    function step(dt) {
+      state.time += dt;
+      state.transition = Math.max(0, state.transition - dt * 1.8);
+      state.regionCooldown = Math.max(0, state.regionCooldown - dt);
+      if (state.messageTimer > 0) {
+        state.messageTimer -= dt;
+        if (state.messageTimer <= 0 && state.mode !== "battle") message.hidden = true;
+      }
+      for (const p of state.particles) {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 180 * dt;
+        p.life -= dt;
+      }
+      state.particles = state.particles.filter(p => p.life > 0);
+
+      if (state.mode === "map") {
+        recoverPlayerIfBlocked();
+        let dx = 0;
+        let dy = 0;
+        if (state.keys.has("ArrowLeft") || state.keys.has("a") || state.keys.has("A")) dx -= 1;
+        if (state.keys.has("ArrowRight") || state.keys.has("d") || state.keys.has("D")) dx += 1;
+        if (state.keys.has("ArrowUp") || state.keys.has("w") || state.keys.has("W")) dy -= 1;
+        if (state.keys.has("ArrowDown") || state.keys.has("s") || state.keys.has("S")) dy += 1;
+        if (dx || dy) {
+          const len = Math.hypot(dx, dy);
+          const bounds = mapRegions[state.mapRegion].bounds;
+          const nx = clamp(state.player.x + dx / len * 150 * dt, bounds.minX, bounds.maxX);
+          const ny = clamp(state.player.y + dy / len * 150 * dt, bounds.minY, bounds.maxY);
+          if (isWalkable(nx, state.player.y)) state.player.x = nx;
+          if (isWalkable(state.player.x, ny)) state.player.y = ny;
+          state.player.tx = state.player.x;
+          state.player.ty = state.player.y;
+          state.player.step += dt;
+          state.player.moving = true;
+          state.player.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
+        } else {
+          state.player.moving = Math.hypot(state.player.tx - state.player.x, state.player.ty - state.player.y) > 2;
+        }
+        const nextX = state.player.x + (state.player.tx - state.player.x) * Math.min(1, dt * 11);
+        const nextY = state.player.y + (state.player.ty - state.player.y) * Math.min(1, dt * 11);
+        if (isWalkable(nextX, state.player.y)) state.player.x = nextX;
+        else state.player.tx = state.player.x;
+        if (isWalkable(state.player.x, nextY)) state.player.y = nextY;
+        else state.player.ty = state.player.y;
+        checkRegionTransition();
+        if (state.player.moving && isInTallGrass()) state.encounterClock += dt;
+        else state.encounterClock = 0;
+        if (currentZone() && isInTallGrass() && state.encounterClock > .7 && Math.random() < dt * .78) {
+          state.encounterClock = 0;
+          startEncounter();
+        }
+      }
+
+      if (state.battle) {
+        state.battle.flash = Math.max(0, state.battle.flash - dt * 2.6);
+        state.battle.shake = Math.max(0, state.battle.shake - dt * 3.2);
+        state.battle.capturePulse = Math.max(0, state.battle.capturePulse - dt * 1.4);
+      }
+    }
+
+    function draw() {
+      if (state.mode === "map") drawMap();
+      if (state.mode === "battle") drawBattle();
+      if (state.mode === "dex") drawDex();
+      if (state.mode === "party") drawParty();
+      if (state.mode === "home") drawHome();
+      drawParticles();
+      if (state.transition > 0) {
+        ctx.fillStyle = `rgba(255, 250, 244, ${state.transition * .55})`;
+        ctx.fillRect(0, 0, W, H);
+      }
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function drawBackdrop() {
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, "#dff3ff");
+      g.addColorStop(.48, "#fbfdff");
+      g.addColorStop(1, "#fff1e5");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+      for (let i = 0; i < 9; i++) {
+        drawCloud((i * 166 - state.time * 13) % 1280 - 90, 74 + Math.sin(i * 1.7 + state.time * .45) * 18, 1 + (i % 3) * .16);
+      }
+    }
+
+    function drawCloud(x, y, s) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(s, s);
+      ctx.fillStyle = "rgba(255,255,255,.62)";
+      ctx.beginPath();
+      ctx.ellipse(0, 16, 46, 18, 0, 0, Math.PI * 2);
+      ctx.ellipse(-31, 18, 25, 15, 0, 0, Math.PI * 2);
+      ctx.ellipse(31, 14, 29, 18, 0, 0, Math.PI * 2);
+      ctx.ellipse(2, 2, 31, 23, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function getMapView() {
+      const region = mapRegions[state.mapRegion];
+      const cameraY = clamp(state.player.y - H * .56, 0, WORLD_H - H);
+      return { region, scale: 1, sourceH: H, cameraY };
+    }
+
+    function drawMap() {
+      const view = getMapView();
+      drawOverworld(view.cameraY);
+      const screenX = state.player.x;
+      const screenY = state.player.y - view.cameraY;
+      drawTrainerToken(screenX, screenY, .74);
+      if (isInTallGrass()) drawGrassForeground(screenX, screenY);
+      drawExplorationHud();
+    }
+
+    function drawOverworld(cameraY = 0) {
+      ctx.fillStyle = "#8fce70";
+      ctx.fillRect(0, 0, W, H);
+      const grid = worldMaps[state.mapRegion];
+      const firstRow = Math.max(0, Math.floor(cameraY / TILE));
+      const lastRow = Math.min(MAP_ROWS - 1, Math.ceil((cameraY + H) / TILE));
+      for (let row = firstRow; row <= lastRow; row++) {
+        for (let col = 0; col < MAP_COLS; col++) {
+          drawOverworldTile(grid[row][col], col * TILE, row * TILE - cameraY, col, row);
+        }
+      }
+      drawRegionLandmarks(cameraY);
+    }
+
+    function drawOverworldTile(tile, x, y, col, row) {
+      const alt = (col + row) % 2;
+      if (tile === "grass" || tile === "tall" || tile === "tree") {
+        ctx.fillStyle = alt ? "#9bda78" : "#91d16f";
+        ctx.fillRect(x, y, TILE, TILE);
+        ctx.fillStyle = "rgba(55,116,51,.16)";
+        ctx.fillRect(x + 5, y + 24, 12, 2);
+        if ((col * 17 + row * 11) % 29 === 0 && tile === "grass") {
+          if (mapFlowers.complete && mapFlowers.naturalWidth) ctx.drawImage(mapFlowers, x + 9, y + 7, 24, 18);
+        }
+      }
+      if (tile === "path") {
+        ctx.fillStyle = alt ? "#e9cd91" : "#f0d9a3";
+        ctx.fillRect(x, y, TILE, TILE);
+        ctx.fillStyle = "rgba(133,91,49,.14)";
+        ctx.fillRect(x + 5, y + 8, 3, 2);
+        ctx.fillRect(x + 20, y + 24, 7, 2);
+      }
+      if (tile === "tall") {
+        if (mapTallGrass.complete && mapTallGrass.naturalWidth) ctx.drawImage(mapTallGrass, x - 4, y + 2, 40, 29);
+      }
+      if (tile === "water") {
+        ctx.fillStyle = alt ? "#58add8" : "#64b8df";
+        ctx.fillRect(x, y, TILE, TILE);
+        ctx.fillStyle = "rgba(28,107,158,.18)";
+        ctx.fillRect(x, y + 28, TILE, 4);
+        ctx.strokeStyle = "rgba(255,255,255,.55)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + 4, y + 12 + Math.sin(state.time * 3 + col) * 2);
+        ctx.quadraticCurveTo(x + 14, y + 7, x + 27, y + 12);
+        ctx.stroke();
+      }
+      if (tile === "building") {
+        ctx.fillStyle = "#e9e3d8";
+        ctx.fillRect(x, y, TILE, TILE);
+        ctx.fillStyle = row % 4 < 2 ? "#648fc0" : "#527caf";
+        ctx.fillRect(x, y, TILE, 10);
+        ctx.strokeStyle = "rgba(47,55,66,.22)";
+        ctx.strokeRect(x, y, TILE, TILE);
+      }
+      if (tile === "rock") {
+        ctx.fillStyle = alt ? "#9bda78" : "#91d16f";
+        ctx.fillRect(x, y, TILE, TILE);
+        if (mapRocks.complete && mapRocks.naturalWidth) ctx.drawImage(mapRocks, x - 7, y - 6, 46, 40);
+      }
+      if (tile === "tree") {
+        ctx.fillStyle = "rgba(33,67,37,.2)";
+        ctx.beginPath();
+        ctx.ellipse(x + 16, y + 28, 18, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+        if (mapTree.complete && mapTree.naturalWidth) ctx.drawImage(mapTree, x - 12, y - 34, 56, 63);
+      }
+    }
+
+    function drawGrassForeground(x, y) {
+      ctx.save();
+      if (mapTallGrass.complete && mapTallGrass.naturalWidth) {
+        ctx.globalAlpha = .92;
+        ctx.drawImage(mapTallGrass, x - 37, y - 1, 74, 52);
+      }
+      ctx.restore();
+    }
+
+    function drawRegionLandmarks(cameraY) {
+      ctx.save();
+      ctx.translate(0, -cameraY);
+      if (state.mapRegion === "city") drawCityLandmarks();
+      else drawForestLandmarks();
+      ctx.restore();
+    }
+
+    function drawCityLandmarks() {
+      drawBuildingAsset(researchBuilding, 20, 135, 400, 363);
+      drawBuildingAsset(shopBuilding, 700, 178, 400, 320);
+      drawFountain(560, 520);
+      drawWoodBridge(512, 640, 96, 128);
+      [[448, 448], [672, 448], [448, 592], [672, 592], [480, 816], [640, 816]].forEach(([x, y]) => drawLamp(x, y));
+      drawSignpost(560, 92, "晨曦森林");
+      for (let i = 0; i < 8; i++) {
+        drawFlowerCluster(370 + (i % 4) * 72, 472 + Math.floor(i / 4) * 118, i);
+      }
+      drawFenceLine(352, 294, 128, false);
+      drawFenceLine(640, 294, 128, false);
+      drawSignpost(368, 438, "研究所");
+      drawSignpost(746, 438, "灵宠商店");
+    }
+
+    function drawForestLandmarks() {
+      drawAncientTree(272, 474, 1.18);
+      drawAncientTree(900, 764, 1.32);
+      drawCaveEntrance(112, 514);
+      drawWaterfall(896, 430);
+      drawWoodBridge(606, 548, 96, 42);
+      drawSignpost(656, 864, "晴风城");
+      drawSignpost(560, 82, "焰岩山");
+      drawFenceLine(430, 334, 128, false);
+      drawFenceLine(606, 650, 128, false);
+      for (let i = 0; i < 15; i++) {
+        drawFlowerCluster(390 + (i % 5) * 48, 500 + Math.floor(i / 5) * 42, i + 3);
+      }
+    }
+
+    function drawCityBuilding(x, y, w, h, roof, label) {
+      ctx.fillStyle = "rgba(37,42,50,.2)";
+      roundRect(x + 8, y + 12, w, h, 8);
+      ctx.fill();
+      ctx.fillStyle = "#f7f2e8";
+      roundRect(x, y, w, h, 8);
+      ctx.fill();
+      ctx.fillStyle = roof;
+      ctx.beginPath();
+      ctx.moveTo(x - 10, y + 38);
+      ctx.lineTo(x + w / 2, y - 18);
+      ctx.lineTo(x + w + 10, y + 38);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "rgba(37,42,50,.3)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = "#8dc2df";
+      for (let i = 0; i < 4; i++) ctx.fillRect(x + 22 + i * 50, y + 58, 24, 28);
+      ctx.fillStyle = "#806249";
+      ctx.fillRect(x + w / 2 - 18, y + 88, 36, 48);
+      ctx.fillStyle = "#fffaf4";
+      roundRect(x + 40, y + 96, w - 80, 25, 4);
+      ctx.fill();
+      ctx.fillStyle = "#334153";
+      ctx.font = "900 13px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(label, x + w / 2, y + 113);
+    }
+
+    function drawBuildingAsset(image, x, y, w, h) {
+      ctx.fillStyle = "rgba(34,48,58,.2)";
+      ctx.beginPath();
+      ctx.ellipse(x + w / 2, y + h - 12, w * .42, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      if (image.complete && image.naturalWidth) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(image, x, y, w, h);
+      }
+    }
+
+    function drawFountain(x, y) {
+      ctx.fillStyle = "rgba(37,42,50,.18)";
+      ctx.beginPath();
+      ctx.ellipse(x, y + 12, 72, 28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#e9edf0";
+      ctx.beginPath();
+      ctx.ellipse(x, y, 68, 29, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#63b9dd";
+      ctx.beginPath();
+      ctx.ellipse(x, y - 2, 54, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#d7e0e5";
+      ctx.fillRect(x - 7, y - 48, 14, 48);
+      ctx.strokeStyle = "rgba(255,255,255,.8)";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(x, y - 44);
+      ctx.quadraticCurveTo(x - 30, y - 38, x - 37, y - 10);
+      ctx.moveTo(x, y - 44);
+      ctx.quadraticCurveTo(x + 30, y - 38, x + 37, y - 10);
+      ctx.stroke();
+    }
+
+    function drawWoodBridge(x, y, w, h) {
+      ctx.fillStyle = "#81593b";
+      ctx.fillRect(x - 5, y, w + 10, h);
+      ctx.fillStyle = "#c18b58";
+      const horizontal = w > h;
+      if (horizontal) {
+        for (let xx = x; xx < x + w; xx += 16) ctx.fillRect(xx, y + 4, 13, h - 8);
+      } else {
+        for (let yy = y; yy < y + h; yy += 16) ctx.fillRect(x + 4, yy, w - 8, 13);
+      }
+    }
+
+    function drawLamp(x, y) {
+      ctx.fillStyle = "#415568";
+      ctx.fillRect(x - 3, y - 30, 6, 34);
+      ctx.fillStyle = "#ffd96a";
+      ctx.beginPath();
+      ctx.arc(x, y - 33, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#415568";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    function drawSignpost(x, y, label) {
+      ctx.fillStyle = "#735137";
+      ctx.fillRect(x - 4, y - 4, 8, 34);
+      ctx.fillStyle = "#f1d49c";
+      roundRect(x - 48, y - 26, 96, 25, 4);
+      ctx.fill();
+      ctx.strokeStyle = "#735137";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#493a2e";
+      ctx.font = "900 12px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(label, x, y - 9);
+    }
+
+    function drawFenceLine(x, y, length, vertical) {
+      ctx.strokeStyle = "#8b6341";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (vertical ? 0 : length), y + (vertical ? length : 0));
+      ctx.stroke();
+      for (let i = 0; i <= length; i += 32) {
+        ctx.fillStyle = "#a9794b";
+        ctx.fillRect(x + (vertical ? -4 : i - 3), y + (vertical ? i - 3 : -8), 7, 18);
+      }
+    }
+
+    function drawFlowerCluster(x, y, seed) {
+      if (mapFlowers.complete && mapFlowers.naturalWidth) {
+        ctx.drawImage(mapFlowers, x - 8, y - 7, 42, 31);
+        return;
+      }
+      const colors = ["#f6aec0", "#fff2a1", "#c2a7ef", "#fff"];
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = colors[(i + seed) % colors.length];
+        ctx.beginPath();
+        ctx.arc(x + (i % 3) * 7, y + Math.floor(i / 3) * 7, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawAncientTree(x, y, scale) {
+      if (mapTree.complete && mapTree.naturalWidth) {
+        ctx.fillStyle = "rgba(31,52,31,.22)";
+        ctx.beginPath();
+        ctx.ellipse(x, y + 46 * scale, 55 * scale, 16 * scale, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.drawImage(mapTree, x - 68 * scale, y - 104 * scale, 136 * scale, 154 * scale);
+        return;
+      }
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+      ctx.fillStyle = "rgba(31,52,31,.25)";
+      ctx.beginPath();
+      ctx.ellipse(0, 48, 56, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#765036";
+      ctx.fillRect(-18, -12, 36, 62);
+      ctx.fillStyle = "#2f7340";
+      [[-34,-24],[0,-40],[35,-20],[-18,-52],[20,-58]].forEach(([cx, cy], i) => {
+        ctx.beginPath();
+        ctx.arc(cx, cy, 31 - i % 2 * 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.fillStyle = "#9bd06b";
+      ctx.beginPath();
+      ctx.arc(-19, -58, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCaveEntrance(x, y) {
+      if (mapRocks.complete && mapRocks.naturalWidth) {
+        ctx.drawImage(mapRocks, x - 68, y - 66, 136, 117);
+      }
+      ctx.fillStyle = "#69736f";
+      ctx.beginPath();
+      ctx.moveTo(x - 48, y + 34);
+      ctx.quadraticCurveTo(x - 42, y - 48, x, y - 58);
+      ctx.quadraticCurveTo(x + 46, y - 46, x + 52, y + 34);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#26312f";
+      ctx.beginPath();
+      ctx.ellipse(x, y + 8, 25, 40, 0, Math.PI, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(x - 25, y + 7, 50, 28);
+    }
+
+    function drawWaterfall(x, y) {
+      ctx.fillStyle = "rgba(213,245,255,.82)";
+      ctx.fillRect(x - 28, y - 28, 56, 94);
+      ctx.strokeStyle = "#78c8e8";
+      ctx.lineWidth = 7;
+      for (let i = -2; i <= 2; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x + i * 10, y - 24);
+        ctx.quadraticCurveTo(x + i * 8 + Math.sin(state.time * 3 + i) * 5, y + 20, x + i * 10, y + 62);
+        ctx.stroke();
+      }
+    }
+
+    function drawExplorationHud() {
+      const zone = currentZone();
+      ctx.save();
+      ctx.fillStyle = "rgba(255,250,244,.9)";
+      roundRect(18, 18, 300, 58, 8);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(55,65,52,.3)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#2f4a36";
+      ctx.font = "950 20px ui-rounded, system-ui";
+      ctx.textAlign = "left";
+      ctx.fillText(mapRegions[state.mapRegion].name, 34, 43);
+      ctx.fillStyle = "#687281";
+      ctx.font = "850 13px ui-rounded, system-ui";
+      ctx.fillText(zone && isInTallGrass() ? `高草丛：${zone.name}` : "只有在高草丛中移动才会随机遇敌", 34, 64);
+      ctx.restore();
+    }
+
+    function drawTileWorld() {
+      ctx.fillStyle = "#94d978";
+      ctx.fillRect(0, 0, W, H);
+      for (let y = 0; y < H; y += 32) {
+        for (let x = 0; x < W; x += 32) {
+          drawGrassTile(x, y, (x / 32 + y / 32) % 2);
+        }
+      }
+      drawWater(0, 522, 360, 118);
+      drawWater(656, 330, 176, 310);
+      drawWater(832, 512, 288, 128);
+      drawPath(416, 0, 96, 640);
+      drawPath(112, 250, 824, 96);
+      drawPath(512, 344, 350, 74);
+      drawBridge(680, 420, 128, 56);
+      ctx.strokeStyle = "rgba(37,42,50,.18)";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(2, 2, W - 4, H - 4);
+    }
+
+    function drawGrassTile(x, y, alt) {
+      ctx.fillStyle = alt ? "#9ee27e" : "#92d66f";
+      ctx.fillRect(x, y, 32, 32);
+      ctx.fillStyle = "rgba(255,255,255,.14)";
+      ctx.fillRect(x + 2, y + 2, 28, 2);
+      ctx.fillStyle = "rgba(42,109,55,.18)";
+      ctx.fillRect(x + 6, y + 22, 12, 2);
+      ctx.fillRect(x + 22, y + 12, 6, 2);
+    }
+
+    function drawPath(x, y, w, h) {
+      ctx.fillStyle = "#e5c88e";
+      ctx.fillRect(x, y, w, h);
+      for (let yy = y; yy < y + h; yy += 32) {
+        for (let xx = x; xx < x + w; xx += 32) {
+          ctx.fillStyle = "#f3dfa8";
+          ctx.fillRect(xx + 2, yy + 2, 28, 28);
+          ctx.fillStyle = "rgba(147,101,54,.12)";
+          ctx.fillRect(xx + 6, yy + 24, 18, 2);
+        }
+      }
+      ctx.strokeStyle = "rgba(93,75,45,.2)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    }
+
+    function drawWater(x, y, w, h) {
+      ctx.fillStyle = "#5fb4df";
+      ctx.fillRect(x, y, w, h);
+      for (let yy = y; yy < y + h; yy += 24) {
+        for (let xx = x; xx < x + w; xx += 48) {
+          ctx.strokeStyle = "rgba(255,255,255,.38)";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(xx + (yy % 48), yy + 12);
+          ctx.quadraticCurveTo(xx + 16, yy + 4, xx + 32, yy + 12);
+          ctx.stroke();
+        }
+      }
+      ctx.strokeStyle = "#3b8fbf";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(x, y, w, h);
+    }
+
+    function drawBridge(x, y, w, h) {
+      ctx.fillStyle = "#b98658";
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = "#7f5438";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(x, y, w, h);
+      ctx.lineWidth = 2;
+      for (let xx = x + 12; xx < x + w; xx += 22) {
+        ctx.beginPath();
+        ctx.moveTo(xx, y + 4);
+        ctx.lineTo(xx, y + h - 4);
+        ctx.stroke();
+      }
+    }
+
+    function drawTallGrass(z, index) {
+      const left = z.x - z.rx;
+      const top = z.y - z.ry;
+      const cols = Math.floor((z.rx * 2) / 24);
+      const rows = Math.floor((z.ry * 2) / 22);
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const gx = left + col * 24 + 12;
+          const gy = top + row * 22 + 16;
+          const sway = Math.sin(state.time * 3 + col + row + index) * 2;
+          ctx.fillStyle = row % 2 ? "#48b768" : "#3fa75d";
+          ctx.beginPath();
+          ctx.moveTo(gx - 11, gy + 6);
+          ctx.quadraticCurveTo(gx - 8 + sway, gy - 10, gx - 2, gy + 6);
+          ctx.quadraticCurveTo(gx + sway, gy - 14, gx + 6, gy + 6);
+          ctx.quadraticCurveTo(gx + 10 + sway, gy - 8, gx + 13, gy + 6);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+      ctx.fillStyle = "rgba(37,42,50,.72)";
+      ctx.font = "900 17px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(z.name, z.x, z.y + z.ry + 28);
+    }
+
+    function drawMapObjects() {
+      for (let x = 16; x < W; x += 64) drawTree(x, 34, .95);
+      for (let x = 20; x < 380; x += 64) drawTree(x, 126, .92);
+      for (let x = 548; x < 1016; x += 64) drawTree(x, 124, .92);
+      for (let y = 54; y < 500; y += 64) drawTree(1030, y, .9);
+      drawHouse(536, 156);
+      drawSign(594, 300);
+      drawFlowerPatch(894, 170);
+      drawFlowerPatch(206, 478);
+      drawRock(348, 560);
+      drawRock(858, 454);
+    }
+
+    function drawTree(x, y, s) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(s, s);
+      ctx.fillStyle = "#8b5e3d";
+      ctx.fillRect(-8, 26, 16, 28);
+      ctx.fillStyle = "#2f8f55";
+      ctx.beginPath();
+      ctx.arc(-18, 20, 22, 0, Math.PI * 2);
+      ctx.arc(18, 20, 22, 0, Math.PI * 2);
+      ctx.arc(0, 0, 25, 0, Math.PI * 2);
+      ctx.arc(0, 28, 25, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#1f6e41";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.18)";
+      ctx.beginPath();
+      ctx.arc(-10, 4, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawHouse(x, y) {
+      ctx.fillStyle = "#f8efe5";
+      ctx.fillRect(x, y + 34, 116, 88);
+      ctx.fillStyle = "#c8645d";
+      ctx.beginPath();
+      ctx.moveTo(x - 10, y + 42);
+      ctx.lineTo(x + 58, y - 10);
+      ctx.lineTo(x + 126, y + 42);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#8c403d";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = "#6aa4d8";
+      ctx.fillRect(x + 18, y + 58, 28, 24);
+      ctx.fillStyle = "#8b5e3d";
+      ctx.fillRect(x + 70, y + 70, 28, 52);
+      ctx.strokeStyle = "rgba(37,42,50,.2)";
+      ctx.strokeRect(x, y + 34, 116, 88);
+    }
+
+    function drawSign(x, y) {
+      ctx.fillStyle = "#8b5e3d";
+      ctx.fillRect(x + 18, y + 28, 8, 28);
+      ctx.fillStyle = "#f3dfa8";
+      ctx.fillRect(x, y, 46, 32);
+      ctx.strokeStyle = "#8b5e3d";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x, y, 46, 32);
+    }
+
+    function drawFlowerPatch(x, y) {
+      const colors = ["#ef8d86", "#ffc85a", "#8d83c9", "#fff"];
+      for (let i = 0; i < 18; i++) {
+        const fx = x + (i % 6) * 18;
+        const fy = y + Math.floor(i / 6) * 18;
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.beginPath();
+        ctx.arc(fx, fy, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawRock(x, y) {
+      ctx.fillStyle = "#b7c1c8";
+      ctx.beginPath();
+      ctx.ellipse(x, y, 26, 18, -.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#7f8a91";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    function drawNpc(x, y, color, mark) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = "rgba(37,42,50,.18)";
+      ctx.beginPath();
+      ctx.ellipse(0, 24, 18, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#f4c8b8";
+      ctx.fillRect(-10, -28, 20, 20);
+      ctx.fillStyle = color;
+      ctx.fillRect(-12, -8, 24, 30);
+      ctx.fillStyle = "#252a32";
+      ctx.font = "900 12px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(mark, 0, 12);
+      ctx.restore();
+    }
+
+    function drawMapHud() {
+      ctx.fillStyle = "rgba(255,255,255,.82)";
+      roundRect(18, 18, 230, 54, 12);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(37,42,50,.13)";
+      ctx.stroke();
+      ctx.fillStyle = "#252a32";
+      ctx.font = "950 18px ui-rounded, system-ui";
+      ctx.textAlign = "left";
+      ctx.fillText("中心都市 · 1号道路", 36, 50);
+    }
+
+    function drawZone(z, index) {
+      const glow = .52 + Math.sin(state.time * 2.1 + index) * .11;
+      ctx.save();
+      ctx.translate(z.x, z.y);
+      ctx.fillStyle = hexToRgba(z.color, glow);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, z.rx, z.ry, Math.sin(index) * .06, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = hexToRgba(z.color, .72);
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.globalAlpha = .34;
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      for (let r = .35; r <= .9; r += .18) {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, z.rx * r, z.ry * r, Math.sin(index) * .06, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "rgba(37,42,50,.72)";
+      ctx.font = "900 20px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(z.name, 0, z.ry + 34);
+      ctx.restore();
+    }
+
+    function drawRoomProps() {
+      drawBlocks(120, 432, 1);
+      drawBlocks(876, 406, 1.08);
+      drawMoonLamp(960, 140);
+      drawStarGarland(140, 118);
+      drawPillow(520, 164, "#fff5f5");
+      drawPillow(702, 154, "#f2fbff");
+    }
+
+    function drawBlocks(x, y, s) {
+      const colors = ["#ffc85a", "#7ebce8", "#ef8d86"];
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(s, s);
+      colors.forEach((color, i) => {
+        ctx.fillStyle = color;
+        roundRect(i * 45, -i * 18, 44, 44, 9);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(37,42,50,.14)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,.35)";
+        ctx.beginPath();
+        ctx.ellipse(i * 45 + 15, -i * 18 + 12, 10, 5, -.4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    function drawMoonLamp(x, y) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = "#ffc85a";
+      ctx.shadowColor = "rgba(255,200,90,.5)";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(0, 0, 44, .5 * Math.PI, 1.55 * Math.PI);
+      ctx.arc(24, -4, 35, 1.55 * Math.PI, .5 * Math.PI, true);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawStarGarland(x, y) {
+      ctx.save();
+      ctx.strokeStyle = "rgba(37,42,50,.12)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x + 160, y + 48, x + 300, y - 30, x + 444, y + 22);
+      ctx.stroke();
+      for (let i = 0; i < 6; i++) {
+        drawStar(x + i * 86, y + Math.sin(i) * 22 + 16, 10, "#ffc85a", state.time * .8 + i);
+      }
+      ctx.restore();
+    }
+
+    function drawPillow(x, y, color) {
+      ctx.fillStyle = color;
+      roundRect(x, y, 152, 62, 22);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(37,42,50,.09)";
+      ctx.stroke();
+    }
+
+    function drawBattle() {
+      const b = state.battle;
+      drawPokemonBattleBackdrop();
+      drawBattlePlatform(318, 432, 256, 66, false);
+      drawBattlePlatform(792, 278, 270, 68, true);
+      const shake = b.shake ? Math.sin(state.time * 70) * b.shake * 5 : 0;
+      drawBattleHeroBack(224 + shake, 440);
+      drawBattleMonSprite(b.ally.id, 386 + shake, 418, .95, false);
+      drawBattleMonSprite(b.enemy.id, 808, 250 + Math.sin(state.time * 3) * 3, 1.28, true);
+      drawBattleStatusBox(84, 72, b.enemy, "enemy");
+      drawBattleStatusBox(662, 382, b.ally, "ally");
+      drawCaptureAura(808, 250, b.capturePulse);
+      drawBattleLocationTag(b.zone);
+    }
+
+    function drawPokemonBattleBackdrop() {
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.filter = "blur(2px) saturate(.86) brightness(.98)";
+      drawOverworld(getMapView().cameraY);
+      ctx.filter = "none";
+      const wash = ctx.createLinearGradient(0, 0, 0, H);
+      wash.addColorStop(0, "rgba(235,248,255,.32)");
+      wash.addColorStop(.52, "rgba(255,255,255,.18)");
+      wash.addColorStop(1, "rgba(66,112,58,.3)");
+      ctx.fillStyle = wash;
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
+
+    function drawPixelCloud(x, y) {
+      ctx.fillRect(x, y + 16, 84, 20);
+      ctx.fillRect(x + 18, y, 38, 36);
+      ctx.fillRect(x + 54, y + 8, 48, 28);
+      ctx.fillRect(x - 20, y + 18, 38, 18);
+    }
+
+    function drawBattlePlatform(x, y, w, h, enemy) {
+      ctx.fillStyle = enemy ? "#d7c48d" : "#c6e19a";
+      ctx.beginPath();
+      ctx.ellipse(x, y, w / 2, h / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = enemy ? "#9a8354" : "#6c9c52";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.28)";
+      ctx.beginPath();
+      ctx.ellipse(x - w * .14, y - h * .12, w * .22, h * .12, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawBattleLocationTag(zone) {
+      ctx.fillStyle = "#fffaf4";
+      ctx.strokeStyle = "#2f3742";
+      ctx.lineWidth = 4;
+      ctx.fillRect(432, 18, 256, 38);
+      ctx.strokeRect(432, 18, 256, 38);
+      ctx.fillStyle = "#2f3742";
+      ctx.font = "900 17px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(zone, 560, 43);
+    }
+
+    function drawBattleHeroBack(x, y) {
+      prepareProtagonistCutout();
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.fillStyle = "rgba(37,42,50,.17)";
+      ctx.beginPath();
+      ctx.ellipse(x, y + 22, 44, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      if (protagonistCutout) {
+        const f = characterFrames.up;
+        ctx.drawImage(protagonistCutout, f.sx, f.sy, f.sw, f.sh, x - 54, y - 150, 108, 216);
+      } else {
+        drawTrainerToken(x, y, 1.3);
+      }
+      ctx.restore();
+    }
+
+    function drawBattleMonSprite(id, x, y, scale, faceLeft) {
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
+      drawMonSprite(id, x, y, scale, faceLeft);
+      ctx.restore();
+    }
+
+    function drawTrainerToken(x, y, size) {
+      if (drawReferenceHero(x, y, size)) return;
+      ctx.save();
+      ctx.translate(x, y + Math.sin(state.time * 8) * 1.5);
+      ctx.scale(size, size);
+      ctx.fillStyle = "rgba(37,42,50,.16)";
+      ctx.beginPath();
+      ctx.ellipse(0, 24, 22, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#f4c8b8";
+      ctx.fillRect(-12, -30, 24, 22);
+      ctx.fillStyle = "#b3886f";
+      ctx.fillRect(-13, -34, 26, 10);
+      ctx.fillRect(-9, -38, 18, 6);
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(-7, -22, 5, 5);
+      ctx.fillRect(4, -22, 5, 5);
+      ctx.fillStyle = "#f7f6f4";
+      ctx.fillRect(-14, -8, 28, 30);
+      ctx.fillStyle = "#e6c08a";
+      ctx.fillRect(12, -4, 16, 18);
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(17, 2, 3, 3);
+      ctx.fillStyle = "#d8d4cf";
+      ctx.fillRect(-15, 20, 12, 8);
+      ctx.fillRect(3, 20, 12, 8);
+      ctx.strokeStyle = "rgba(37,42,50,.28)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-14, -8, 28, 30);
+      ctx.restore();
+    }
+
+    function prepareProtagonistCutout() {
+      if (!protagonist.complete || !protagonist.naturalWidth || protagonistCutout) return;
+      const off = document.createElement("canvas");
+      off.width = protagonist.naturalWidth;
+      off.height = protagonist.naturalHeight;
+      const offCtx = off.getContext("2d");
+      offCtx.drawImage(protagonist, 0, 0);
+      const img = offCtx.getImageData(0, 0, off.width, off.height);
+      const data = img.data;
+      const seen = new Uint8Array(off.width * off.height);
+      const queue = new Int32Array(off.width * off.height);
+      let head = 0;
+      let tail = 0;
+      const add = (p) => {
+        if (seen[p]) return;
+        const i = p * 4;
+        const max = Math.max(data[i], data[i + 1], data[i + 2]);
+        const min = Math.min(data[i], data[i + 1], data[i + 2]);
+        if ((data[i] + data[i + 1] + data[i + 2]) / 3 < 222 || max - min > 28) return;
+        seen[p] = 1;
+        queue[tail++] = p;
+      };
+      for (let x = 0; x < off.width; x++) {
+        add(x);
+        add((off.height - 1) * off.width + x);
+      }
+      for (let y = 0; y < off.height; y++) {
+        add(y * off.width);
+        add(y * off.width + off.width - 1);
+      }
+      while (head < tail) {
+        const p = queue[head++];
+        const x = p % off.width;
+        const y = (p / off.width) | 0;
+        data[p * 4 + 3] = 0;
+        if (x) add(p - 1);
+        if (x + 1 < off.width) add(p + 1);
+        if (y) add(p - off.width);
+        if (y + 1 < off.height) add(p + off.width);
+      }
+      offCtx.putImageData(img, 0, 0);
+      protagonistCutout = off;
+    }
+
+    function drawReferenceHero(x, y, size) {
+      prepareProtagonistCutout();
+      if (!protagonistCutout) return false;
+      const dir = state.player.dir || "down";
+      let frame = characterFrames[dir] || characterFrames.down;
+      let mirror = dir === "left";
+      if (state.player.moving && (dir === "left" || dir === "right")) {
+        frame = characterFrames.walk[Math.floor(state.time * 9) % characterFrames.walk.length];
+      }
+      const bob = state.player.moving ? Math.sin(state.time * 12) * 2 : 0;
+      const dh = 82 * size;
+      const dw = dh * frame.sw / frame.sh;
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.fillStyle = "rgba(37,42,50,.18)";
+      ctx.beginPath();
+      ctx.ellipse(x, y + 26 * size, 18 * size, 6 * size, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.translate(x, 0);
+      if (mirror) ctx.scale(-1, 1);
+      ctx.drawImage(protagonistCutout, frame.sx, frame.sy, frame.sw, frame.sh, -dw / 2, y - dh + 30 * size + bob, dw, dh);
+      ctx.restore();
+      return true;
+    }
+
+    function drawTrainerCard(x, y, w, h) {
+      ctx.save();
+      ctx.fillStyle = "#fff";
+      roundRect(x, y, w, h, 18);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(37,42,50,.13)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.clip();
+      drawProtagonist(x + 12, y - 12, w - 24, h + 44);
+      ctx.restore();
+      ctx.fillStyle = "rgba(255,255,255,.9)";
+      roundRect(x + 16, y + h - 44, w - 32, 30, 9);
+      ctx.fill();
+      ctx.fillStyle = "#252a32";
+      ctx.font = "900 16px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText("新人训练师 · 图鉴调查员", x + w / 2, y + h - 23);
+    }
+
+    function drawProtagonist(x, y, w, h) {
+      prepareProtagonistCutout();
+      if (!protagonistCutout) return;
+      const ratio = protagonistCrop.sw / protagonistCrop.sh;
+      let dx = x, dy = y, dw = w, dh = h;
+      if (w / h > ratio) {
+        dh = h;
+        dw = h * ratio;
+        dx = x + (w - dw) / 2;
+      } else {
+        dw = w;
+        dh = w / ratio;
+        dy = y + (h - dh) / 2;
+      }
+      ctx.drawImage(protagonistCutout, protagonistCrop.sx, protagonistCrop.sy, protagonistCrop.sw, protagonistCrop.sh, dx, dy, dw, dh);
+    }
+
+    function drawStatusPanel(x, y, m) {
+      ctx.fillStyle = "rgba(255,255,255,.9)";
+      roundRect(x, y, 332, 88, 14);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(37,42,50,.12)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#252a32";
+      ctx.font = "950 21px ui-rounded, system-ui";
+      ctx.textAlign = "left";
+      ctx.fillText(`${m.name}  Lv.${m.level}`, x + 16, y + 31);
+      drawTypeBadge(x + 244, y + 14, m.type);
+      drawBar(x + 16, y + 52, 300, 16, m.hp / m.maxHp);
+    }
+
+    function drawBattleStatusBox(x, y, m, side) {
+      const w = 366;
+      const h = side === "enemy" ? 92 : 104;
+      ctx.save();
+      ctx.fillStyle = "#fffaf4";
+      ctx.strokeStyle = "#2f3742";
+      ctx.lineWidth = 4;
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+      ctx.fillStyle = "#d9e5ef";
+      ctx.fillRect(x + 7, y + 7, w - 14, h - 14);
+      ctx.fillStyle = "#fffaf4";
+      ctx.fillRect(x + 14, y + 14, w - 28, h - 28);
+
+      ctx.fillStyle = "#2f3742";
+      ctx.font = "950 22px ui-rounded, system-ui";
+      ctx.textAlign = "left";
+      ctx.fillText(m.name, x + 26, y + 42);
+      ctx.textAlign = "right";
+      ctx.fillText(`Lv.${m.level}`, x + w - 28, y + 42);
+
+      ctx.fillStyle = "#2f3742";
+      ctx.font = "900 13px ui-rounded, system-ui";
+      ctx.textAlign = "left";
+      ctx.fillText("HP", x + 38, y + 67);
+      ctx.fillStyle = "#2f3742";
+      ctx.fillRect(x + 66, y + 56, 258, 18);
+      const ratio = clamp(m.hp / m.maxHp, 0, 1);
+      ctx.fillStyle = ratio > .5 ? "#48b768" : ratio > .25 ? "#ffc85a" : "#ef8d86";
+      ctx.fillRect(x + 70, y + 60, 250 * ratio, 10);
+      if (side !== "enemy") {
+        ctx.fillStyle = "#2f3742";
+        ctx.font = "900 15px ui-rounded, system-ui";
+        ctx.textAlign = "right";
+        ctx.fillText(`${m.hp}/${m.maxHp}`, x + w - 36, y + 94);
+      }
+      drawPixelTypeChip(x + 26, y + h - 28, m.type);
+      ctx.restore();
+    }
+
+    function drawPixelTypeChip(x, y, id) {
+      const t = type(id);
+      ctx.fillStyle = t.a;
+      ctx.fillRect(x, y, 68, 20);
+      ctx.strokeStyle = t.b;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, 68, 20);
+      ctx.fillStyle = "#fff";
+      ctx.font = "900 12px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(t.name, x + 34, y + 14);
+    }
+
+    function drawBar(x, y, w, h, v) {
+      ctx.fillStyle = "rgba(37,42,50,.1)";
+      roundRect(x, y, w, h, h / 2);
+      ctx.fill();
+      ctx.fillStyle = v > .52 ? "#71bea8" : v > .25 ? "#ffc85a" : "#ef8d86";
+      roundRect(x, y, w * clamp(v, 0, 1), h, h / 2);
+      ctx.fill();
+    }
+
+    function drawTypeBadge(x, y, id) {
+      const t = type(id);
+      ctx.fillStyle = t.a;
+      roundRect(x, y, 70, 28, 9);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.font = "900 14px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(t.name, x + 35, y + 19);
+    }
+
+    function drawDex() {
+      drawBackdrop();
+      drawBookFrame("云栖灵宠图鉴");
+      mons.forEach((m, i) => {
+        const column = Math.floor(i / 8);
+        const row = i % 8;
+        const x = 54 + column * 246;
+        const y = 102 + row * 54;
+        const active = state.selectedDex === i;
+        ctx.fillStyle = active ? "rgba(255,200,90,.58)" : "rgba(255,255,255,.62)";
+        roundRect(x, y, 230, 44, 10);
+        ctx.fill();
+        ctx.fillStyle = state.captured.has(m.id) ? "#252a32" : "rgba(37,42,50,.38)";
+        ctx.font = "900 16px ui-rounded, system-ui";
+        ctx.textAlign = "left";
+        ctx.fillText(`${String(i + 1).padStart(3, "0")}  ${state.captured.has(m.id) ? m.name : "？？？"}`, x + 13, y + 28);
+      });
+      const m = mons[state.selectedDex];
+      const known = state.captured.has(m.id);
+      drawMonSprite(m.id, 756, 250, 1.75, true, !known);
+      ctx.fillStyle = "#252a32";
+      ctx.font = "950 34px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(known ? m.name : "未收录灵宠", 756, 398);
+      if (known) drawTypeBadge(721, 416, m.type);
+      ctx.fillStyle = "rgba(37,42,50,.72)";
+      ctx.font = "850 19px ui-rounded, system-ui";
+      wrapText(known ? m.desc : "前往对应生态区域，成功建立伙伴关系后会解锁资料。", 610, 482, 310, 30);
+    }
+
+    function drawParty() {
+      drawBackdrop();
+      drawBookFrame("当前队伍");
+      state.party.forEach((id, i) => {
+        const m = mon(id);
+        const x = 170 + i * 270;
+        ctx.fillStyle = "rgba(255,255,255,.72)";
+        roundRect(x, 154, 220, 286, 18);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(37,42,50,.12)";
+        ctx.stroke();
+        drawMonSprite(id, x + 110, 282, 1.25, false);
+        ctx.fillStyle = "#252a32";
+        ctx.font = "950 24px ui-rounded, system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText(m.name, x + 110, 386);
+        drawTypeBadge(x + 75, 404, m.type);
+      });
+    }
+
+    function drawHome() {
+      drawBackdrop();
+      drawBookFrame("帕洛斯研究所");
+      drawTrainerCard(140, 172, 274, 278);
+      ctx.fillStyle = "#252a32";
+      ctx.font = "950 36px ui-rounded, system-ui";
+      ctx.textAlign = "left";
+      ctx.fillText("休息、补给、养成入口", 512, 178);
+      ctx.fillStyle = "rgba(37,42,50,.7)";
+      ctx.font = "850 20px ui-rounded, system-ui";
+      wrapText("帕洛斯研究所负责治疗伙伴、补充调查物资，并发布各生态区域的图鉴任务。", 514, 222, 420, 34);
+      ctx.fillStyle = "rgba(255,255,255,.66)";
+      roundRect(514, 356, 360, 86, 14);
+      ctx.fill();
+      ctx.fillStyle = "#252a32";
+      ctx.font = "900 19px ui-rounded, system-ui";
+      ctx.fillText(`队伍：${state.party.map(id => mon(id).name).join("、")}`, 538, 390);
+      ctx.fillText(`补给：捕捉球 ${state.stickers}，灵晶 ${state.candy}`, 538, 418);
+    }
+
+    function drawBookFrame(title) {
+      ctx.fillStyle = "rgba(255,250,244,.9)";
+      roundRect(74, 62, 972, 504, 28);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(37,42,50,.11)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#f2e2cf";
+      roundRect(104, 98, 392, 420, 18);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.58)";
+      roundRect(126, 122, 348, 372, 12);
+      ctx.fill();
+      ctx.fillStyle = "#252a32";
+      ctx.font = "950 26px ui-rounded, system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(title, W / 2, 46);
+    }
+
+    function wrapText(text, x, y, maxWidth, lineHeight) {
+      let line = "";
+      for (const ch of text) {
+        const test = line + ch;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          ctx.fillText(line, x, y);
+          line = ch;
+          y += lineHeight;
+        } else {
+          line = test;
+        }
+      }
+      if (line) ctx.fillText(line, x, y);
+    }
+
+    function drawMonSprite(id, x, y, scale, faceLeft, silhouette = false) {
+      if (drawReferencePet(id, x, y, scale, faceLeft, silhouette)) return;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = "rgba(37,42,50,.13)";
+      ctx.beginPath();
+      ctx.ellipse(0, 54 * scale, 70 * scale, 16 * scale, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.scale(faceLeft ? -scale : scale, scale);
+      if (silhouette) ctx.globalAlpha = .28;
+      ctx.shadowColor = "rgba(40,54,72,.15)";
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetY = 5;
+      ({ bear: drawBear, sparkfox: drawSparkFox, bubbleturtle: drawBubbleTurtle, leafbunny: drawLeafBunny, milkbubble: drawMilkDragon, mooncat: drawMoonCat })[id]();
+      ctx.restore();
+    }
+
+    function preparePetLineupCutout() {
+      if (!petLineup.complete || !petLineup.naturalWidth || petLineupCutout) return;
+      const off = document.createElement("canvas");
+      off.width = petLineup.naturalWidth;
+      off.height = petLineup.naturalHeight;
+      const offCtx = off.getContext("2d");
+      offCtx.drawImage(petLineup, 0, 0);
+      const img = offCtx.getImageData(0, 0, off.width, off.height);
+      const data = img.data;
+      const seen = new Uint8Array(off.width * off.height);
+      const queue = new Int32Array(off.width * off.height);
+      let head = 0;
+      let tail = 0;
+      const add = (p) => {
+        if (seen[p]) return;
+        const i = p * 4;
+        const max = Math.max(data[i], data[i + 1], data[i + 2]);
+        const min = Math.min(data[i], data[i + 1], data[i + 2]);
+        if ((data[i] + data[i + 1] + data[i + 2]) / 3 < 220 || max - min > 32) return;
+        seen[p] = 1;
+        queue[tail++] = p;
+      };
+      for (let x = 0; x < off.width; x++) {
+        add(x);
+        add((off.height - 1) * off.width + x);
+      }
+      for (let y = 0; y < off.height; y++) {
+        add(y * off.width);
+        add(y * off.width + off.width - 1);
+      }
+      while (head < tail) {
+        const p = queue[head++];
+        const x = p % off.width;
+        const y = (p / off.width) | 0;
+        data[p * 4 + 3] = 0;
+        if (x) add(p - 1);
+        if (x + 1 < off.width) add(p + 1);
+        if (y) add(p - off.width);
+        if (y + 1 < off.height) add(p + off.width);
+      }
+      offCtx.putImageData(img, 0, 0);
+      petLineupCutout = off;
+    }
+
+    function prepareExtraPetLineupCutout() {
+      if (!petLineupExtra.complete || !petLineupExtra.naturalWidth || petLineupExtraCutout) return;
+      const off = document.createElement("canvas");
+      off.width = petLineupExtra.naturalWidth;
+      off.height = petLineupExtra.naturalHeight;
+      const offCtx = off.getContext("2d");
+      offCtx.drawImage(petLineupExtra, 0, 0);
+      const img = offCtx.getImageData(0, 0, off.width, off.height);
+      const data = img.data;
+      const seen = new Uint8Array(off.width * off.height);
+      const queue = new Int32Array(off.width * off.height);
+      let head = 0;
+      let tail = 0;
+      const add = (p) => {
+        if (seen[p]) return;
+        const i = p * 4;
+        const max = Math.max(data[i], data[i + 1], data[i + 2]);
+        const min = Math.min(data[i], data[i + 1], data[i + 2]);
+        if ((data[i] + data[i + 1] + data[i + 2]) / 3 < 220 || max - min > 32) return;
+        seen[p] = 1;
+        queue[tail++] = p;
+      };
+      for (let x = 0; x < off.width; x++) {
+        add(x);
+        add((off.height - 1) * off.width + x);
+      }
+      for (let y = 0; y < off.height; y++) {
+        add(y * off.width);
+        add(y * off.width + off.width - 1);
+      }
+      while (head < tail) {
+        const p = queue[head++];
+        const x = p % off.width;
+        const y = (p / off.width) | 0;
+        data[p * 4 + 3] = 0;
+        if (x) add(p - 1);
+        if (x + 1 < off.width) add(p + 1);
+        if (y) add(p - off.width);
+        if (y + 1 < off.height) add(p + off.width);
+      }
+      offCtx.putImageData(img, 0, 0);
+      petLineupExtraCutout = off;
+    }
+
+    function drawReferencePet(id, x, y, scale, faceLeft, silhouette = false) {
+      preparePetLineupCutout();
+      prepareExtraPetLineupCutout();
+      const frame = petFrames[id] || extraPetFrames[id];
+      const source = petFrames[id] ? petLineupCutout : petLineupExtraCutout;
+      if (!source || !frame) return false;
+      const renderScale = scale * .62;
+      const dw = frame.sw * renderScale;
+      const dh = frame.sh * renderScale;
+      ctx.save();
+      ctx.fillStyle = "rgba(37,42,50,.16)";
+      ctx.beginPath();
+      ctx.ellipse(x, y + 54 * scale, Math.max(44, dw * .33), 16 * scale, 0, 0, Math.PI * 2);
+      ctx.fill();
+      if (silhouette) ctx.globalAlpha = .28;
+      ctx.translate(x, y);
+      if (faceLeft) ctx.scale(-1, 1);
+      ctx.drawImage(
+        source,
+        frame.sx,
+        frame.sy,
+        frame.sw,
+        frame.sh,
+        -dw / 2,
+        -dh * frame.anchorY + 58 * scale,
+        dw,
+        dh
+      );
+      ctx.restore();
+      return true;
+    }
+
+    function bodyGrad(a, light, b, x = -16, y = -34, r = 96) {
+      const g = ctx.createRadialGradient(x, y, 8, 0, 0, r);
+      g.addColorStop(0, light);
+      g.addColorStop(.56, a);
+      g.addColorStop(1, b);
+      return g;
+    }
+
+    function base(a, b, light) {
+      ctx.fillStyle = bodyGrad(a, light, b);
+      ctx.strokeStyle = b;
+      ctx.lineWidth = 3.5;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+    }
+
+    function eyes(size = 6.6) {
+      ctx.fillStyle = "#17191f";
+      ctx.beginPath();
+      ctx.ellipse(-15, -16, size, size * 1.12, 0, 0, Math.PI * 2);
+      ctx.ellipse(15, -16, size, size * 1.12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(-18, -20, size * .34, 0, Math.PI * 2);
+      ctx.arc(12, -20, size * .34, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.5)";
+      ctx.beginPath();
+      ctx.arc(-11, -11, size * .18, 0, Math.PI * 2);
+      ctx.arc(19, -11, size * .18, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function cheeks(y = -6) {
+      ctx.fillStyle = "rgba(239,141,134,.33)";
+      ctx.beginPath();
+      ctx.ellipse(-30, y, 11, 6, 0, 0, Math.PI * 2);
+      ctx.ellipse(30, y, 11, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function shine() {
+      ctx.fillStyle = "rgba(255,255,255,.34)";
+      ctx.beginPath();
+      ctx.ellipse(-17, -12, 15, 27, -.35, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawBear() {
+      base("#e6c08a", "#9a6b42", "#fff0cf");
+      ctx.beginPath();
+      ctx.ellipse(0, 8, 43, 48, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke(); shine();
+      ctx.beginPath();
+      ctx.ellipse(0, -42, 39, 35, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      [-30, 30].forEach(ex => {
+        ctx.fillStyle = bodyGrad("#e6c08a", "#fff0cf", "#9a6b42", ex - 4, -74, 36);
+        ctx.beginPath(); ctx.arc(ex, -68, 15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      });
+      eyes(6.1); cheeks(-9);
+      ctx.fillStyle = "#fff3df";
+      ctx.beginPath(); ctx.ellipse(0, -29, 16, 11, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#17191f";
+      ctx.beginPath(); ctx.ellipse(0, -33, 5, 4, 0, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function drawSparkFox() {
+      base("#ffd35c", "#b88323", "#fff4bd");
+      ctx.beginPath(); ctx.ellipse(0, 11, 50, 39, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); shine();
+      ctx.beginPath(); ctx.ellipse(0, -35, 39, 35, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      [-30, 30].forEach(ex => {
+        ctx.fillStyle = bodyGrad("#ffd35c", "#fff4bd", "#b88323", ex, -80, 58);
+        ctx.beginPath(); ctx.moveTo(ex, -54); ctx.lineTo(ex * 1.55, -96); ctx.lineTo(ex * .4, -70); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#fff2ae";
+        ctx.beginPath(); ctx.moveTo(ex, -63); ctx.lineTo(ex * 1.22, -82); ctx.lineTo(ex * .62, -70); ctx.closePath(); ctx.fill();
+      });
+      ctx.fillStyle = bodyGrad("#f8c344", "#fff0aa", "#a87320", 64, -32, 88);
+      ctx.beginPath(); ctx.moveTo(40, 8); ctx.quadraticCurveTo(88, -24, 58, -58); ctx.quadraticCurveTo(99, -43, 94, -2); ctx.quadraticCurveTo(84, 38, 40, 32); ctx.fill(); ctx.stroke();
+      drawStar(70, -8, 18, "#fff6c8", 0);
+      eyes(6.6); cheeks(-6);
+      ctx.strokeStyle = "#7b5620"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(-8, -4); ctx.quadraticCurveTo(0, 3, 8, -4); ctx.stroke();
+    }
+
+    function drawBubbleTurtle() {
+      base("#7ebce8", "#397eb5", "#dff6ff");
+      ctx.beginPath(); ctx.ellipse(0, 12, 55, 39, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.58)";
+      ctx.beginPath(); ctx.ellipse(0, 2, 39, 28, 0, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = "rgba(57,126,181,.35)"; ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.62)";
+      ctx.beginPath(); ctx.ellipse(-14, -8, 12, 8, -.45, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = bodyGrad("#9ed2ef", "#e5f8ff", "#397eb5", -12, -48, 70); ctx.strokeStyle = "#397eb5";
+      ctx.beginPath(); ctx.ellipse(0, -35, 32, 28, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      [-38, 38].forEach(ex => {
+        ctx.fillStyle = bodyGrad("#7ebce8", "#dff6ff", "#397eb5", ex, 28, 36);
+        ctx.beginPath(); ctx.ellipse(ex, 34, 18, 10, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      });
+      eyes(6); cheeks(-7);
+    }
+
+    function drawLeafBunny() {
+      base("#71bea8", "#438b72", "#e6fff5");
+      ctx.beginPath(); ctx.ellipse(0, 8, 43, 47, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      [-22, 22].forEach(ex => {
+        ctx.fillStyle = bodyGrad("#77c8ad", "#e6fff5", "#438b72", ex, -68, 72);
+        ctx.beginPath(); ctx.ellipse(ex, -58, 15, 44, ex * .008, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = "rgba(67,139,114,.45)"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(ex, -88); ctx.quadraticCurveTo(ex * .9, -64, ex * .8, -32); ctx.stroke();
+        ctx.strokeStyle = "#438b72"; ctx.lineWidth = 3.5;
+      });
+      ctx.fillStyle = "#f6fff9";
+      ctx.beginPath(); ctx.ellipse(0, 16, 22, 25, 0, 0, Math.PI * 2); ctx.fill();
+      shine(); eyes(6.5); cheeks(-5);
+      ctx.fillStyle = "#ef8d86";
+      ctx.beginPath(); ctx.ellipse(0, -3, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
+    }
+
+    function drawMilkDragon() {
+      base("#f08b72", "#b95843", "#ffe0d2");
+      ctx.beginPath(); ctx.ellipse(0, 8, 45, 44, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); shine();
+      ctx.beginPath(); ctx.ellipse(0, -38, 34, 31, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#fff4e8";
+      [-12, 5, 22].forEach((ex, i) => { ctx.beginPath(); ctx.arc(ex, -70 + i * 3, 12, 0, Math.PI * 2); ctx.fill(); });
+      ctx.fillStyle = "rgba(255,255,255,.52)";
+      ctx.beginPath(); ctx.ellipse(-12, -73, 7, 4, -.3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#ffd9bd";
+      ctx.beginPath(); ctx.ellipse(-42, 2, 24, 13, -.5, 0, Math.PI * 2); ctx.ellipse(42, 2, 24, 13, .5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      eyes(6.2); cheeks(-7);
+      ctx.strokeStyle = "#9a4538"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(-7, -4); ctx.quadraticCurveTo(0, 2, 7, -4); ctx.stroke();
+    }
+
+    function drawMoonCat() {
+      base("#8d83c9", "#57508d", "#eeeaff");
+      ctx.beginPath(); ctx.ellipse(0, 9, 43, 43, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      [-24, 24].forEach(ex => {
+        ctx.fillStyle = bodyGrad("#8d83c9", "#eeeaff", "#57508d", ex, -64, 66);
+        ctx.beginPath(); ctx.moveTo(ex, -38); ctx.lineTo(ex * 1.45, -78); ctx.lineTo(ex * .35, -56); ctx.closePath(); ctx.fill(); ctx.stroke();
+      });
+      ctx.fillStyle = bodyGrad("#8d83c9", "#eeeaff", "#57508d", 62, -22, 88);
+      ctx.beginPath(); ctx.moveTo(36, 18); ctx.quadraticCurveTo(90, -22, 54, -62); ctx.quadraticCurveTo(74, -22, 34, -6); ctx.fill(); ctx.stroke();
+      shine(); eyes(6.4); cheeks(-5);
+      ctx.strokeStyle = "#fff0a8"; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(0, -36, 15, .3, 1.7 * Math.PI); ctx.stroke();
+    }
+
+    function drawCaptureAura(x, y, pulse) {
+      if (!pulse) return;
+      ctx.save();
+      ctx.globalAlpha = pulse;
+      ctx.strokeStyle = "#ffc85a";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(x, y - 10, 88 + (1 - pulse) * 50, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawParticles() {
+      for (const p of state.particles) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life / p.max);
+        drawStar(p.x, p.y, p.r, p.color, state.time * 4);
+        ctx.restore();
+      }
+    }
+
+    function drawStar(x, y, r, color, rot) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const a = -Math.PI / 2 + i * Math.PI / 5;
+        const rr = i % 2 ? r * .45 : r;
+        ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function hexToRgba(hex, alpha) {
+      const n = parseInt(hex.slice(1), 16);
+      return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+    }
+
+    let last = performance.now();
+    function loop(now) {
+      const dt = Math.min(.033, (now - last) / 1000);
+      last = now;
+      step(dt);
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    shell.addEventListener("pointerdown", event => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width * W;
+      const y = (event.clientY - rect.top) / rect.height * H;
+      if (state.mode === "map") {
+        const view = getMapView();
+        const worldX = x / view.scale;
+        const worldY = y / view.scale + view.cameraY;
+        const dx = worldX - state.player.x;
+        const dy = worldY - state.player.y;
+        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+          state.player.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
+          state.player.moving = true;
+        }
+        const bounds = mapRegions[state.mapRegion].bounds;
+        state.player.tx = clamp(worldX, bounds.minX, bounds.maxX);
+        state.player.ty = clamp(worldY, bounds.minY, bounds.maxY);
+      }
+      if (state.mode === "dex") {
+        const column = x >= 300 && x <= 530 ? 1 : x >= 54 && x <= 284 ? 0 : -1;
+        const row = Math.floor((y - 102) / 54);
+        const withinRow = (y - 102) % 54 <= 44;
+        const index = column * 8 + row;
+        if (column >= 0 && row >= 0 && row < 8 && withinRow && index < mons.length) state.selectedDex = index;
+      }
+    });
+
+    mobileControls.addEventListener("pointerdown", event => {
+      const button = event.target.closest("[data-key]");
+      if (!button) return;
+      event.preventDefault();
+      event.stopPropagation();
+      button.setPointerCapture?.(event.pointerId);
+      state.keys.add(button.dataset.key);
+    });
+
+    ["pointerup", "pointercancel"].forEach(name => {
+      mobileControls.addEventListener(name, event => {
+        const button = event.target.closest("[data-key]");
+        if (!button) return;
+        event.preventDefault();
+        event.stopPropagation();
+        state.keys.delete(button.dataset.key);
+      });
+    });
+
+    touchAction.addEventListener("pointerdown", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      interactMap();
+    });
+
+    window.addEventListener("keydown", event => {
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "a", "A", "d", "D", "w", "W", "s", "S"].includes(event.key)) event.preventDefault();
+      state.keys.add(event.key);
+      if (event.key === " " && state.mode === "map") interactMap();
+      if (event.key === "Escape" && state.mode === "battle") setMode("map");
+    });
+    window.addEventListener("keyup", event => state.keys.delete(event.key));
+
+    battleMenu.addEventListener("click", event => {
+      const button = event.target.closest("button");
+      if (button) battleAction(button.dataset.action);
+    });
+
+    tabs.map.addEventListener("click", () => setMode("map"));
+    tabs.dex.addEventListener("click", () => setMode("dex"));
+    tabs.party.addEventListener("click", () => setMode("party"));
+    tabs.home.addEventListener("click", () => setMode("home"));
+
+    window.addEventListener("resize", () => {
+      fitCanvas();
+      draw();
+    });
+    protagonist.addEventListener("load", () => {
+      prepareProtagonistCutout();
+      draw();
+    });
+    petLineup.addEventListener("load", () => {
+      preparePetLineupCutout();
+      draw();
+    });
+    petLineupExtra.addEventListener("load", () => {
+      prepareExtraPetLineupCutout();
+      draw();
+    });
+    researchBuilding.addEventListener("load", draw);
+    shopBuilding.addEventListener("load", draw);
+    [mapTree, mapRocks, mapTallGrass, mapFlowers].forEach(asset => asset.addEventListener("load", draw));
+
+    fitCanvas();
+    updateUI();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
