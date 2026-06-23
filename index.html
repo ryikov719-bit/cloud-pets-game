@@ -727,7 +727,12 @@
 
     function interactMap() {
       if (state.mode !== "map") return;
-      setMessage(isInTallGrass() ? "草叶正在沙沙作响，继续移动可能遇见野生灵宠。" : "附近没有可互动的目标。", 1.6);
+      if (isInTallGrass()) {
+        setMessage("草叶突然沙沙作响……", .55);
+        setTimeout(startEncounter, 360);
+        return;
+      }
+      setMessage("附近没有可互动的目标。", 1.6);
     }
 
     function updateUI() {
@@ -1000,8 +1005,8 @@
           if (grassTile !== state.lastGrassTile) {
             state.lastGrassTile = grassTile;
             state.grassStepCount += 1;
-            const chance = Math.min(.18 + Math.max(0, state.grassStepCount - 2) * .1, .72);
-            if (state.grassStepCount >= 8 || Math.random() < chance) {
+            const chance = Math.min(.42 + Math.max(0, state.grassStepCount - 1) * .16, .82);
+            if (state.grassStepCount >= 3 || Math.random() < chance) {
               state.grassStepCount = 0;
               state.lastGrassTile = "";
               startEncounter();
