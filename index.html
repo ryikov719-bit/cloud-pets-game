@@ -56,6 +56,7 @@
     .app {
       width: min(1240px, 100%);
       height: min(780px, 100%);
+      min-width: 0;
       min-height: 590px;
       display: grid;
       grid-template-rows: 56px 1fr 64px;
@@ -312,26 +313,42 @@
       }
 
       .app {
+        width: 100%;
         height: 100dvh;
         min-height: 0;
         grid-template-rows: 44px minmax(0, 1fr) 50px;
         gap: 4px;
       }
 
+      .top,
+      .bottom {
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .stats {
+        flex: 1 1 auto;
+        justify-content: flex-end;
+        gap: 4px;
+        overflow: hidden;
+      }
+
       .brand { gap: 7px; font-size: 17px; }
       .brand-mark { width: 32px; height: 32px; border-radius: 9px; }
 
       .brand span:last-child {
-        max-width: 43vw;
+        max-width: 31vw;
         overflow: hidden;
         text-overflow: ellipsis;
       }
 
       .pill {
         height: 34px;
-        min-width: 52px;
-        padding: 0 6px;
-        font-size: 12px;
+        min-width: 0;
+        flex: 0 1 auto;
+        padding: 0 5px;
+        font-size: 11px;
+        gap: 3px;
       }
 
       .nav button {
@@ -741,7 +758,11 @@
       dexCountEl.textContent = `${state.captured.size}/${mons.length}`;
     }
 
-    function setMode(mode) {
+    function setMode(mode, force = false) {
+      if (state.mode === "battle" && mode !== "battle" && !force) {
+        setMessage("战斗还没有结束。先选择招式、安抚、守护或捕捉。", 1.6);
+        return false;
+      }
       state.mode = mode;
       shell.dataset.mode = mode;
       battleMenu.hidden = mode !== "battle";
@@ -768,6 +789,39 @@
         updateUI();
         setMessage("回到帕洛斯研究所，捕捉球与灵晶已经补充完毕。");
       }
+      return true;
+    }
+
+    const typeChart = {
+      fire: { leaf: 1.6, ice: 1.6, water: .75, rock: .75, ground: .85 },
+      water: { fire: 1.6, rock: 1.6, ground: 1.4, leaf: .75, spark: .85 },
+      leaf: { water: 1.6, rock: 1.5, ground: 1.5, fire: .75, ice: .85 },
+      spark: { water: 1.6, moon: 1.4, ground: .65, rock: .85 },
+      ice: { leaf: 1.5, moon: 1.4, water: .8, fire: .75 },
+      rock: { fire: 1.5, spark: 1.4, water: .75, leaf: .75 },
+      ground: { spark: 1.6, fire: 1.3, water: .75, leaf: .75 },
+      moon: { leaf: 1.25, spark: .75, ice: .75 },
+      ghost: { normal: 1.5, fairy: .75 },
+      fairy: { ghost: 1.5, fire: .85 }
+    };
+
+    function typeMultiplier(attacker, defender) {
+      return typeChart[attacker]?.[defender] || 1;
+    }
+
+    function typeCallout(multiplier) {
+      if (multiplier >= 1.35) return "效果拔群！";
+      if (multiplier <= .8) return "效果一般。";
+      return "";
+    }
+
+    function finishBattle(text, seconds = 1.7, nextMode = "map") {
+      const b = state.battle;
+      if (b) b.phase = "ending";
+      state.keys.clear();
+      state.player.moving = false;
+      setMessage(text, seconds);
+      setTimeout(() => setMode(nextMode, true), Math.max(900, seconds * 720));
     }
 
     function currentZone() {
@@ -835,6 +889,8 @@
       if (state.mode !== "map") return;
       const z = currentZone();
       if (!isInTallGrass()) return;
+      state.keys.clear();
+      state.player.moving = false;
       const pool = z ? z.pool : mons.filter(m => m.id !== "bear").map(m => m.id);
       const enemy = structuredClone(mon(pool[Math.floor(Math.random() * pool.length)]));
       enemy.level += Math.floor(rand(0, 3));
@@ -864,13 +920,21 @@
       const e = b.enemy;
       const a = b.ally;
       if (action === "attack") {
-        const damage = Math.floor(rand(8, 13) + a.power);
-        e.hp = clamp(e.hp - damage, 1, e.maxHp);
+        const multiplier = typeMultiplier(a.type, e.type);
+        const damage = Math.max(4, Math.floor((rand(8, 13) + a.power) * multiplier));
+        e.hp = clamp(e.hp - damage, 0, e.maxHp);
         e.alert = clamp(e.alert - 10, 0, 100);
         b.flash = .8;
         b.shake = .9;
         burst(790, 260, type(a.type).a, 28);
-        setMessage(`${a.name} 发动属性招式，${e.name} 的体力与警觉降低了。`, 1.5);
+        if (e.hp <= 0) {
+          state.candy += 1;
+          updateUI();
+          burst(790, 260, "#ffc85a", 44);
+          finishBattle(`${a.name} 打败了 ${e.name}。${typeCallout(multiplier)} 获得 1 枚灵晶。`, 1.8);
+          return;
+        }
+        setMessage(`${a.name} 发动属性招式，${e.name} 的体力与警觉降低了。${typeCallout(multiplier)}`, 1.5);
       }
       if (action === "soothe") {
         e.bond = clamp(e.bond + 24, 0, 100);
@@ -896,11 +960,13 @@
 
     function tryCapture() {
       const b = state.battle;
+      if (!b || b.phase !== "player") return;
       const e = b.enemy;
       if (state.stickers <= 0) {
         setMessage("基础捕捉球用完了，回帕洛斯研究所补充后再来。");
         return;
       }
+      b.phase = "capture";
       state.stickers -= 1;
       updateUI();
       b.capturePulse = 1;
@@ -911,8 +977,7 @@
         state.captured.add(e.id);
         if (!state.party.includes(e.id) && state.party.length < 3) state.party.push(e.id);
         updateUI();
-        setMessage(`${e.name} 成为了新的伙伴，生态资料已收入图鉴！`, 2.4);
-        setTimeout(() => setMode("map"), 1350);
+        finishBattle(`${e.name} 成为了新的伙伴，生态资料已收入图鉴！`, 2.1);
       } else {
         e.alert = clamp(e.alert + 9, 0, 100);
         setMessage(`${e.name} 挣脱了捕捉球，再安抚一下会更容易。`, 1.6);
@@ -931,8 +996,7 @@
       b.shake = 1;
       burst(318, 384, type(e.type).a, 20);
       if (a.hp <= 0) {
-        setMessage(`${a.name} 体力不足，先回研究所治疗。`);
-        setTimeout(() => setMode("home"), 1150);
+        finishBattle(`${a.name} 体力不足，先回研究所治疗。`, 1.5, "home");
       } else {
         setMessage(`${e.name} 发动了试探攻击，${a.name} 坚持住了。`, 1.4);
         b.phase = "player";
@@ -2522,7 +2586,7 @@
       event.preventDefault();
       event.stopPropagation();
       button.setPointerCapture?.(event.pointerId);
-      state.keys.add(button.dataset.key);
+      if (state.mode === "map") state.keys.add(button.dataset.key);
     });
 
     ["pointerup", "pointercancel"].forEach(name => {
@@ -2541,9 +2605,12 @@
       interactMap();
     });
 
+    const movementKeys = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "a", "A", "d", "D", "w", "W", "s", "S"];
+    const controlKeys = [...movementKeys, " ", "Escape"];
+
     window.addEventListener("keydown", event => {
-      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "a", "A", "d", "D", "w", "W", "s", "S"].includes(event.key)) event.preventDefault();
-      state.keys.add(event.key);
+      if (controlKeys.includes(event.key)) event.preventDefault();
+      if (movementKeys.includes(event.key) && state.mode === "map") state.keys.add(event.key);
       if (event.key === " " && state.mode === "map") interactMap();
       if (event.key === "Escape" && state.mode === "battle") setMode("map");
     });
