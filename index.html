@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>云栖灵宠图鉴：帕洛斯序章</title>
   <style>
     :root {
@@ -31,6 +31,7 @@
     body {
       width: 100%;
       height: 100%;
+      min-height: 100dvh;
       margin: 0;
       overflow: hidden;
       color: var(--ink);
@@ -39,12 +40,17 @@
         radial-gradient(circle at 86% 16%, rgba(239, 141, 134, .22), transparent 28%),
         linear-gradient(145deg, #fff9f1 0%, #eaf7fb 48%, #fff1e8 100%);
       font-family: ui-rounded, "SF Pro Rounded", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+      overscroll-behavior: none;
     }
 
     body {
       display: grid;
       place-items: center;
-      padding: clamp(8px, 1.8vw, 22px);
+      padding:
+        max(clamp(8px, 1.8vw, 22px), env(safe-area-inset-top))
+        max(clamp(8px, 1.8vw, 22px), env(safe-area-inset-right))
+        max(clamp(8px, 1.8vw, 22px), env(safe-area-inset-bottom))
+        max(clamp(8px, 1.8vw, 22px), env(safe-area-inset-left));
     }
 
     .app {
@@ -157,6 +163,8 @@
       height: 100%;
       display: block;
       touch-action: none;
+      -webkit-touch-callout: none;
+      user-select: none;
     }
 
     .message {
@@ -265,6 +273,7 @@
       pointer-events: auto;
       touch-action: none;
       user-select: none;
+      -webkit-touch-callout: none;
       font-size: 22px;
       line-height: 1;
     }
@@ -295,15 +304,22 @@
 
     @media (max-width: 760px) {
       body {
-        padding: 6px;
+        padding:
+          max(5px, env(safe-area-inset-top))
+          max(5px, env(safe-area-inset-right))
+          max(5px, env(safe-area-inset-bottom))
+          max(5px, env(safe-area-inset-left));
       }
 
       .app {
-        height: 100%;
+        height: 100dvh;
         min-height: 0;
-        grid-template-rows: 50px 1fr 56px;
-        gap: 6px;
+        grid-template-rows: 44px minmax(0, 1fr) 50px;
+        gap: 4px;
       }
+
+      .brand { gap: 7px; font-size: 17px; }
+      .brand-mark { width: 32px; height: 32px; border-radius: 9px; }
 
       .brand span:last-child {
         max-width: 43vw;
@@ -312,34 +328,112 @@
       }
 
       .pill {
-        min-width: 58px;
-        padding: 0 8px;
+        height: 34px;
+        min-width: 52px;
+        padding: 0 6px;
+        font-size: 12px;
       }
 
       .nav button {
-        height: 38px;
-        padding: 0 10px;
+        height: 36px;
+        padding: 0 9px;
+        font-size: 13px;
       }
 
       .battle-menu {
-        grid-template-columns: 1fr;
-        bottom: 10px;
-        right: 10px;
-        width: calc(100% - 20px);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        bottom: max(8px, env(safe-area-inset-bottom));
+        right: 8px;
+        width: calc(100% - 16px);
+        padding: 6px;
       }
 
+      .battle-menu button { min-height: 46px; padding: 6px 7px 6px 22px; font-size: 13px; }
+      .battle-menu button::before { left: 7px; top: 18px; }
+      .battle-menu small { font-size: 10px; }
+
       .message {
-        left: 10px;
-        bottom: 252px;
-        width: calc(100% - 20px);
-        min-height: 60px;
+        left: 8px;
+        width: calc(100% - 16px);
+        min-height: 56px;
+        padding: 9px 11px;
+        border-width: 3px;
+        font-size: 13px;
       }
+
+      .game[data-mode="map"] .message {
+        bottom: max(164px, calc(env(safe-area-inset-bottom) + 148px));
+      }
+
+      .game[data-mode="battle"] .message {
+        top: 8px;
+        bottom: auto;
+      }
+
+      .hint { font-size: 12px; }
     }
 
     @media (pointer: coarse), (max-width: 900px) {
       .mobile-controls:not([hidden]) {
         display: block;
       }
+
+      .dpad {
+        left: max(10px, env(safe-area-inset-left));
+        bottom: max(10px, env(safe-area-inset-bottom));
+        width: 150px;
+        height: 150px;
+        grid-template: repeat(3, 50px) / repeat(3, 50px);
+      }
+
+      .touch-button { width: 48px; height: 48px; }
+
+      .touch-action {
+        right: max(18px, env(safe-area-inset-right));
+        bottom: max(28px, env(safe-area-inset-bottom));
+        width: 68px;
+        height: 68px;
+      }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
+      body {
+        padding:
+          max(3px, env(safe-area-inset-top))
+          max(4px, env(safe-area-inset-right))
+          max(3px, env(safe-area-inset-bottom))
+          max(4px, env(safe-area-inset-left));
+      }
+
+      .app { height: 100dvh; min-height: 0; grid-template-rows: 34px minmax(0, 1fr) 36px; gap: 3px; }
+      .brand { font-size: 15px; gap: 6px; }
+      .brand-mark { width: 28px; height: 28px; border-radius: 8px; }
+      .pill { height: 29px; min-width: 48px; padding: 0 5px; font-size: 11px; }
+      .nav button { height: 32px; padding: 0 9px; font-size: 12px; }
+      .hint { display: none; }
+      .game { border-radius: 8px; }
+      .dpad { width: 120px; height: 120px; grid-template: repeat(3, 40px) / repeat(3, 40px); }
+      .touch-button { width: 38px; height: 38px; font-size: 19px; }
+      .touch-action { width: 56px; height: 56px; bottom: max(12px, env(safe-area-inset-bottom)); }
+      .game[data-mode="map"] .message {
+        left: 142px;
+        bottom: max(8px, env(safe-area-inset-bottom));
+        width: min(410px, calc(100% - 238px));
+        min-height: 50px;
+      }
+      .game[data-mode="battle"] .message {
+        top: auto;
+        left: 8px;
+        bottom: 8px;
+        width: calc(42% - 12px);
+        min-height: 104px;
+      }
+      .battle-menu {
+        right: 8px;
+        bottom: 8px;
+        width: calc(58% - 12px);
+      }
+      .battle-menu button { min-height: 44px; }
     }
   </style>
 </head>
@@ -357,7 +451,7 @@
       </div>
     </header>
 
-    <section class="game" id="gameShell">
+    <section class="game" id="gameShell" data-mode="map">
       <canvas id="game" width="1120" height="640"></canvas>
       <div class="message" id="message">在中心都市·晴风城调查地点、收集物资，并寻找灵宠伙伴。</div>
       <div class="battle-menu" id="battleMenu" hidden>
@@ -595,6 +689,8 @@
       selectedDex: 0,
       messageTimer: 0,
       encounterClock: 0,
+      lastGrassTile: "",
+      grassStepCount: 0,
       battle: null,
       particles: [],
       transition: 0
@@ -642,6 +738,7 @@
 
     function setMode(mode) {
       state.mode = mode;
+      shell.dataset.mode = mode;
       battleMenu.hidden = mode !== "battle";
       mobileControls.hidden = mode !== "map";
       Object.keys(tabs).forEach(key => tabs[key].dataset.active = String(key === mode));
@@ -704,6 +801,8 @@
       state.mapRegion = region;
       state.regionCooldown = 1.2;
       state.encounterClock = 0;
+      state.lastGrassTile = "";
+      state.grassStepCount = 0;
       const spawn = region === "forest" ? { x: 656, y: 900, dir: "up" } : { x: 560, y: 104, dir: "down" };
       Object.assign(state.player, { x: spawn.x, y: spawn.y, tx: spawn.x, ty: spawn.y, dir: spawn.dir, moving: false });
       state.transition = 1;
@@ -730,7 +829,7 @@
     function startEncounter() {
       if (state.mode !== "map") return;
       const z = currentZone();
-      if (!z || !isInTallGrass()) return;
+      if (!isInTallGrass()) return;
       const pool = z ? z.pool : mons.filter(m => m.id !== "bear").map(m => m.id);
       const enemy = structuredClone(mon(pool[Math.floor(Math.random() * pool.length)]));
       enemy.level += Math.floor(rand(0, 3));
@@ -896,11 +995,21 @@
         if (isWalkable(state.player.x, nextY)) state.player.y = nextY;
         else state.player.ty = state.player.y;
         checkRegionTransition();
-        if (state.player.moving && isInTallGrass()) state.encounterClock += dt;
-        else state.encounterClock = 0;
-        if (currentZone() && isInTallGrass() && state.encounterClock > .7 && Math.random() < dt * .78) {
-          state.encounterClock = 0;
-          startEncounter();
+        if (state.mode === "map" && state.player.moving && isInTallGrass()) {
+          const grassTile = `${Math.floor(state.player.x / TILE)},${Math.floor((state.player.y + 8) / TILE)}`;
+          if (grassTile !== state.lastGrassTile) {
+            state.lastGrassTile = grassTile;
+            state.grassStepCount += 1;
+            const chance = Math.min(.18 + Math.max(0, state.grassStepCount - 2) * .1, .72);
+            if (state.grassStepCount >= 8 || Math.random() < chance) {
+              state.grassStepCount = 0;
+              state.lastGrassTile = "";
+              startEncounter();
+            }
+          }
+        } else if (!isInTallGrass()) {
+          state.lastGrassTile = "";
+          state.grassStepCount = 0;
         }
       }
 
