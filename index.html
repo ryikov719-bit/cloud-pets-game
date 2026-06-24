@@ -470,7 +470,7 @@
 
     <section class="game" id="gameShell" data-mode="map">
       <canvas id="game" width="1120" height="640"></canvas>
-      <div class="message" id="message">在中心都市·晴风城调查地点、收集物资，并寻找灵宠伙伴。</div>
+      <div class="message" id="message">从研究所出发，向左或向右进入练习草丛，就会随机遇到灵宠伙伴。</div>
       <div class="battle-menu" id="battleMenu" hidden>
         <button data-action="attack">属性招式 <small>造成伤害，打出克制策略</small></button>
         <button data-action="soothe">伙伴安抚 <small>提高亲密，更容易捕捉</small></button>
@@ -616,7 +616,9 @@
     const regionZones = {
       city: [
         { id: "city-west-grass", name: "北门西侧草地", x1: 128, y1: 64, x2: 448, y2: 288, pool: ["leafbunny", "thundermouse", "rockpanda"] },
-        { id: "city-east-grass", name: "北门东侧草地", x1: 672, y1: 64, x2: 992, y2: 288, pool: ["bubbleturtle", "forestdeer", "flowerfairy"] }
+        { id: "city-east-grass", name: "北门东侧草地", x1: 672, y1: 64, x2: 992, y2: 288, pool: ["bubbleturtle", "forestdeer", "flowerfairy"] },
+        { id: "city-starter-west", name: "研究所西侧练习草丛", x1: 96, y1: 544, x2: 448, y2: 640, pool: ["leafbunny", "thundermouse", "sparkfox"] },
+        { id: "city-starter-east", name: "研究所东侧练习草丛", x1: 672, y1: 544, x2: 1024, y2: 640, pool: ["bubbleturtle", "flowerfairy", "rockpanda"] }
       ],
       forest: [
         { id: "forest-northwest", name: "青翠湖畔草丛", x1: 64, y1: 96, x2: 416, y2: 320, pool: ["sparkfox", "waterfox", "flowerfairy"] },
@@ -653,6 +655,8 @@
       fillTiles(g, 8, 13, 26, 18, "path");
       fillTiles(g, 4, 3, 13, 8, "tall");
       fillTiles(g, 21, 3, 30, 8, "tall");
+      fillTiles(g, 3, 17, 13, 19, "tall");
+      fillTiles(g, 21, 17, 31, 19, "tall");
       fillTiles(g, 3, 10, 9, 13, "building");
       fillTiles(g, 25, 10, 31, 13, "building");
       fillTiles(g, 5, 20, 13, 23, "water");
@@ -779,7 +783,7 @@
       if (mode === "map") {
         setMessage(state.mapRegion === "forest"
           ? "晨曦森林生态丰富。调查湖泊、花海、古树和隐秘洞穴，记录新的灵宠。"
-          : "探索中心都市·晴风城，从北门出城口进入晨曦森林。");
+          : "从研究所出发，向左或向右进入练习草丛，就会随机遇到灵宠伙伴。");
       }
       if (mode === "dex") setMessage("云栖灵宠图鉴记录每一只伙伴的属性、栖息地与成长线索。");
       if (mode === "party") setMessage("当前队伍由小火龙带队，捕捉成功的宠物会自动加入。");
